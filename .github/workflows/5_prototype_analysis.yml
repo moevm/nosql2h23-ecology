@@ -1,0 +1,64 @@
+name: "5. Прототип анализ"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check_tag_08_docker_compose:
+    name: "Проверка наличия тега 0.8 и работоспособности docker-compose"
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+        name: Check out current commit
+        with:
+          fetch-depth: 0
+    
+      - name: Build docker-compose
+        run: |
+          docker-compose build --no-cache
+
+      - name: Run docker-compose
+        run: |
+          docker-compose up -d
+          sleep 30
+
+      - name: Check containers are alive
+        run: |
+          echo "::notice:: docker ps --filter status=exited"
+          docker ps --filter status=exited
+          exited_count=`docker ps --filter status=exited |  tail -n +2 | wc -l`
+
+          echo "::notice:: docker ps --filter status=dead" 
+          docker ps --filter status=dead
+          dead_count=`docker ps --filter status=dead |  tail -n +2 | wc -l`
+
+          echo "::notice:: docker ps --filter status=restarting" 
+          docker ps --filter status=restarting
+          restarting_count=`docker ps --filter status=restarting |  tail -n +2 | wc -l`
+
+          echo "::notice:: docker ps --filter status=paused" 
+          docker ps --filter status=paused
+          paused_count=`docker ps --filter status=paused |  tail -n +2 | wc -l`
+
+          echo "::notice:: docker ps --filter status=created" 
+          docker ps --filter status=created
+          created_count=`docker ps --filter status=created |  tail -n +2 | wc -l`
+          
+          if [[ "${exited_count}" != "0" ]] || [[ "${restarting_count}" != "0" ]] || [[ "${paused_count}" != "0" ]] || [[ "${created_count}" != "0" ]] || [[ "${created_count}" != "0" ]]; then
+             echo "::error::Часть контейнеров не находится в состоянии running (завершили или не начали свою работу корректно) "
+             exit 1
+          fi 
+
+
+
+      - name: check_tag
+        run: |
+          TAG="0.8"
+          if [ $(git tag -l "${TAG}") ]; then
+            echo "::notice::Тег ${TAG} найден"
+          else
+            echo "::error::Тег ${TAG} не найден"
+            exit 1
+          fi

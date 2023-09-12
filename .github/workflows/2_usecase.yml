@@ -1,0 +1,40 @@
+name: "2. Usecase"
+
+on:
+  push:
+    branches:
+      - main
+  gollum:
+
+jobs:
+  check_mockup_uc_wiki:
+    name: "Проверка наличия вики-страницы \"Макет и сценарий использования\" и разделов \"Макет UI\" \"Сценарий использования\" в ней"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        name: Check wiki
+        with:
+          repository: ${{github.repository}}.wiki
+      - name: check
+        run: |
+          page="Макет-и-сценарий-использования.md"
+          mockup_header="Макет UI"
+          uc_header="Сценарий использования"
+         
+          if ! [[ -f "${page}" ]]; then 
+            echo "::error::Предварительная проверка не пройдена - не найдена вики-страница \"Макет и сценарий использования\""
+            exit 1
+          fi
+
+          if ! cat "${page}" | grep -q "${mockup_header}"; then 
+            echo "::error::Предварительная проверка не пройдена - не найден заголовок ${mockup_header}" 
+            exit 1
+          fi
+
+
+          if ! cat "${page}" | grep -q "${uc_header}"; then 
+            echo "::error::Предварительная проверка не пройдена - не найден заголовок ${uc_header}" 
+            exit 1
+          fi
+
+          echo "::notice::Предварительная проверка пройдена - вики-страница найдена, нужные заголовки присутствуют"

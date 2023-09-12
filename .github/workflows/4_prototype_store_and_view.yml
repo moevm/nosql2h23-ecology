@@ -1,0 +1,26 @@
+name: "4. Прототип хранение и представление"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check_prototype_store_and_view:
+    name: "Проверка наличия тега 0.5"
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+        name: Check out current commit
+        with:
+          fetch-depth: 0
+    
+      - name: check
+        run: |
+          TAG="0.5"
+          if [ $(git tag -l "${TAG}") ]; then
+            echo "::notice::Тег ${TAG} найден"
+          else
+            echo "::error::Тег ${TAG} не найден"
+            exit 1
+          fi

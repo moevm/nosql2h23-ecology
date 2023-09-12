@@ -1,0 +1,51 @@
+name: "3. Модель данных"
+
+on:
+  push:
+    branches:
+      - main
+  gollum:
+
+jobs:
+  check_data_model:
+    name: "Проверка наличия вики-страницы \"Модель данных\" и разделов \"Нереляционная модель\",  \"Реляционная модель\", \"Сравнение моделей\", \"Вывод\" в ней"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        name: Check wiki
+        with:
+          repository: ${{github.repository}}.wiki
+      - name: check
+        run: |
+          page="Модель-данных.md"
+          nosql_model="Нереляционная модель"
+          sql_model="Сценарий использования"
+          comparison="Сравнение моделей"
+          conclusion="Вывод"
+
+          if ! [[ -f "${page}" ]]; then 
+            echo "::error::Предварительная проверка не пройдена - не найдена вики-страница \"Модель данных\""
+            exit 1
+          fi
+
+          if ! cat "${page}" | grep -q "${nosql_model}"; then 
+            echo "::error::Предварительная проверка не пройдена - не найден заголовок ${nosql_model}"
+            exit 1
+          fi
+
+
+          if ! cat "${page}" | grep -q "${sql_model}"; then 
+            echo "::error::Предварительная проверка не пройдена - не найден заголовок ${sql_model}"
+            exit 1
+          fi
+
+          if ! cat "${page}" | grep -q "${comparison}"; then 
+            echo "::error::Предварительная проверка не пройдена - не найден заголовок ${comparison}"
+            exit 1
+          fi
+
+          if ! cat "${page}" | grep -q "${conclusion}"; then 
+            echo "::error::Предварительная проверка не пройдена - не найден заголовок ${conclusion}"
+            exit 1
+          fi
+          echo "::notice::Предварительная проверка пройдена - вики-страница найдена, нужные заголовки присутствуют "

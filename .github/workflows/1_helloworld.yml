@@ -1,0 +1,31 @@
+name: "1. Установка и настройка выбранной БД + ЯП"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check_hello_world_dir_not_empty:
+    name: "Проверка наличия каталога ./hello_world/"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        name: Check out current commit
+    
+      - name: check
+        run: |
+          dir="./hello_world/"
+          if [ -d "${dir}" ]; then 
+            if [ "$(ls -A ${dir})" ]; then
+              echo "::notice::Предварительная проверка пройдена - каталог ${dir} создан и не пуст"
+              exit 0
+            else
+              echo "::error::Предварительная проверка не пройдена - каталог ${dir} пуст"
+              exit 1
+            fi
+
+          else 
+            echo "::error::Предварительная проверка не пройдена - каталог не найден ${dir}"
+            exit 1
+          fi

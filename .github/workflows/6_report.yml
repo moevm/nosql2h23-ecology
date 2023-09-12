@@ -1,0 +1,29 @@
+name: "6. Пояснительная записка"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check_reports:
+    name: "Проверка наличия пояснительной записки (report.doc / report.docx / report.odt + report.pdf в корне репо)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        name: Check out current commit
+    
+      - name: check
+        run: |
+          
+          if ! ( [[ -f "./report.docx" ]] || [[ -f "./report.doc" ]] || [[ -f "./report.odt" ]] )  ; then 
+            echo "::error::Предварительная проверка не пройдена - не найдены редактируемые версии пояснительной записки"
+            exit 1
+          fi
+
+          if ! [[ -f "./report.pdf" ]] ; then 
+            echo "::error::Предварительная проверка не пройдена - не найдена pdf версия записки"
+            exit 1
+          fi
+
+          echo "::notice::Предварительная проверка пройдена - файлы записки найдены"
