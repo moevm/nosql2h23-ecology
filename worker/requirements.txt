@@ -1,0 +1,9 @@
+pymongo==4.3.3
+gdal2tiles==0.1.9
+opencv-python-headless==4.7.0.72
+rasterio==1.3.6
+redis==4.5.4
+celery==5.2.7
+tensorflow==2.12.0
+arrow==1.2.3
+tzdata==2023.3
