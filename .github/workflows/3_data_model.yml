@@ -19,7 +19,7 @@ jobs:
         run: |
           page="Модель-данных.md"
           nosql_model="Нереляционная модель"
-          sql_model="Сценарий использования"
+          sql_model="Реляционная модель"
           comparison="Сравнение моделей"
           conclusion="Вывод"
 
