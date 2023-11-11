@@ -6,10 +6,12 @@ from flask_socketio import SocketIO
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-from .routes import api_bp
-
 app.config.from_pyfile('config.py')
-app.register_blueprint(api_bp, url_prefix="/api")
+
+from .routes import api
+
+api.init_app(app)
+
 CORS(app)
 
 from .websocket.queue import send_queue
