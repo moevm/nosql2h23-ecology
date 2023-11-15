@@ -16,14 +16,14 @@ tiles_fs = LocalProxy(get_tiles)
 maps_fs = LocalProxy(get_maps)
 redis: StrictRedis = LocalProxy(get_redis)
 
-images_bp = Blueprint('images_bp', __name__, url_prefix="/images")
+maps_bp = Blueprint('maps_bp', __name__, url_prefix="/maps")
 
 
-@images_bp.route('/', methods=['GET'])
+@maps_bp.route('/', methods=['GET'])
 def get_images_list():
-    images = []
-    for img in db.images.find({}):
-        images.append({
+    maps = []
+    for img in db.maps.find({}):
+        maps.append({
             "id": str(img["_id"]),
             "name": img["name"],
             'uploadDate': img["upload_date"],
@@ -32,10 +32,10 @@ def get_images_list():
             "sliced": img["sliced"]
         })
 
-    return images
+    return maps
 
-
-@images_bp.route('/tile_map_resource/<string:img_id>', methods=['GET'])
+''' УБРАТЬ '''
+@maps_bp.route('/tile_map_resource/<string:img_id>', methods=['GET'])
 def index(img_id):
     tile_map_resource = db.images.find_one(ObjectId(img_id))["tile_map_resource"]
     if tile_map_resource is None:
@@ -44,10 +44,10 @@ def index(img_id):
         return db.images.find_one(ObjectId(img_id))["tile_map_resource"]
 
 
-@images_bp.route('/upload_image', methods=['POST'])
-def add_image():
-    image = request.files['image']
-    file_id = maps_fs.put(image, filename=image.filename, chunk_size=256 * 1024)
+@maps_bp.route('/upload_map', methods=['POST'])
+def add_map():
+    new_map = request.files['map']
+    file_id = maps_fs.put(new_map, filename=new_map.filename, chunk_size=256 * 1024)
     img_name = request.form.get('name')
     item = {
         "tile_map_resource": None,
@@ -69,7 +69,7 @@ def add_image():
     return jsonify({'message': 'Image added successfully'})
 
 
-@images_bp.route('/delete_image/<string:img_id>', methods=['DELETE'])
+@maps_bp.route('/delete_image/<string:img_id>', methods=['DELETE'])
 def delete_image(img_id):
     image_info = db.images.find_one(ObjectId(img_id))
     if (image_info):
@@ -87,7 +87,7 @@ def delete_image(img_id):
 
 
 # Маршрут для leaflet-а, возвращает кусочки для отображения.
-@images_bp.route("/tile/<string:img_id>/<int:z>/<int:x>/<int:y>", methods=['GET'])
+@maps_bp.route("/tile/<string:img_id>/<int:z>/<int:x>/<int:y>", methods=['GET'])
 def get_tile(img_id, z, x, y):
     tile = tiles_fs.find_one({'image_id': ObjectId(img_id), 'z': z, 'x': x, 'y': y})
     if tile:
@@ -96,13 +96,13 @@ def get_tile(img_id, z, x, y):
         return 'OK'
 
 
-@images_bp.route('/<string:img_id>', methods=['GET'])
+@maps_bp.route('/<string:img_id>', methods=['GET'])
 def get_image(img_id):
     image_info = db.images.find_one(ObjectId(img_id))
     image_file = tiles_fs.get(image_info["fs_id"])
     return send_file(io.BytesIO(image_file), mimetype='image/tiff')
 
 
-@images_bp.route('/objects/<string:img_id>', methods=['GET'])
+@maps_bp.route('/objects/<string:img_id>', methods=['GET'])
 def get_all_objects(img_id):
     return db.images.find_one(ObjectId(img_id))["objects"] 

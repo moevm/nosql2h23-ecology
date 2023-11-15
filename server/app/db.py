@@ -34,7 +34,6 @@ def get_tiles():
     return fs
 
 
-
 def get_redis():
     r = getattr(g, "redis", None)
     if r is None:

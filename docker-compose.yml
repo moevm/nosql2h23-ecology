@@ -48,7 +48,6 @@ services:
       FLASK_PORT: 80
       MONGO_URI: "mongodb://mongo:27017/db"
       REDIS_URI: "redis://redis:6379/0"
-      DEBUG: False
     depends_on:
       - celery-image
       - celery-slice
