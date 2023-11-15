@@ -143,7 +143,7 @@ class AnomalyBase:
             db.images.update_one({"_id": image_info['_id']}, {"$set": {"anomalies": anomalies_list}})
             db.images.update_one({"_id": image_info['_id']}, {"$set": {"detect_date": str(arrow.now().to('UTC'))}})
 
-        # Удаляем запись в redis-е, если обработки всех аномалий завершились.
+        # Удаляем запись в redis-е, если обработка всех аномалий завершились.
         redis.hset(queue_item, 'processing_functions', int(redis.hget(queue_item, 'processing_functions')) - 1)
         if int(redis.hget(queue_item, 'processing_functions')) == 0:
             redis.delete(queue_item)
