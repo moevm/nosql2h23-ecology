@@ -2,7 +2,7 @@
   <div class="container-lg">
     <h2 class="text-center mt-2 text-primary">Просмотр карты №{{ id }}</h2>
     <div v-if="mapData && mapData.length" class="row justify-content-between">
-      <h3 class="col">Аномалии</h3>
+      <h3 class="col">Объекты</h3>
     </div>
     <AgGridVue
       v-if="mapData && mapData.length"
@@ -23,7 +23,7 @@ import { ref } from "vue";
 import { getMapData } from "@/components/routes/map/api";
 import { AgGridVue } from "ag-grid-vue3";
 import { ColDef, GridOptions } from "ag-grid-community";
-import { AnomalyData } from "@/types/anomalies";
+import { ObjectData } from "@/types/objects";
 import {
   fitActionsColumn,
   getActionsColDef,
@@ -39,28 +39,28 @@ const router = useRouter();
 const props = defineProps<{
   id: string;
   name?: string;
-  anomalyIndex?: string;
+  objectIndex?: string;
 }>();
 const mapDisplay = ref<InstanceType<typeof MapDisplay>>();
 let lastMarker: L.Marker | undefined = undefined;
 
-const columnDefs: ColDef<AnomalyData>[] = [
+const columnDefs: ColDef<ObjectData>[] = [
   { headerName: "Id", field: "id", flex: 2, minWidth: 120 },
   { headerName: "Название", field: "name", flex: 4, minWidth: 180 },
   { headerName: "Площадь", field: "area", flex: 4, minWidth: 180 },
   {
     ...getActionsColDef([
       {
-        tooltip: "Открыть аномалию",
+        tooltip: "Открыть объект",
         icon: "bi bi-radioactive",
         button: "btn-danger",
         onClicked: (action, data) =>
           router.push({
-            name: routeNames.Anomaly,
+            name: routeNames.Object,
             params: {
               id: data.id,
               name: data.name,
-              anomalyIndex: data.anomalyIndex,
+              objectIndex: data.objectIndex,
             },
           }),
       },
@@ -80,7 +80,7 @@ const columnDefs: ColDef<AnomalyData>[] = [
   },
 ];
 
-const options: GridOptions<AnomalyData> = {
+const options: GridOptions<ObjectData> = {
   ...getDefaultGridOptions(),
   pagination: true,
   paginationPageSize: 4,
@@ -88,12 +88,12 @@ const options: GridOptions<AnomalyData> = {
 };
 
 function onMapReady() {
-  if (props.name && props.anomalyIndex) {
+  if (props.name && props.objectIndex) {
     let coordinates: [number, number] = [0, 0];
     for (let i = 0; i < mapData.length; i++) {
       if (
         mapData[i].name === props.name &&
-        mapData[i].anomalyIndex == props.anomalyIndex
+        mapData[i].objectIndex == props.objectIndex
       ) {
         coordinates = mapData[i].coordinates;
         break;

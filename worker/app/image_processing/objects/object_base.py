@@ -7,9 +7,9 @@ from app.image_processing.coordinates_transform.transform_coordinates import Coo
 from app.db import local
 
 
-class AnomalyBase:
+class ObjectBase:
     '''
-    Базовый класс для нахождения аномалий одного типа.
+    Базовый класс для нахождения объектов одного типа.
     '''
     def __init__(self, img_id, image_bytes):
         self.img_id = img_id
@@ -17,33 +17,33 @@ class AnomalyBase:
         self.polygons = []
         self.area = []
         
-        self.name = "Base Anomaly"
+        self.name = "Base Object"
         self.color = "black"
 
         redis = local.redis
         queue_item = f'queue:{img_id}'
-        num_anomalies = int(redis.hget(queue_item, 'processing_functions_immut'))
+        num_objects = int(redis.hget(queue_item, 'processing_functions_immut'))
         self.update = lambda x: redis.hset(queue_item, 
-            'progress', float(redis.hget(queue_item, 'progress')) + (x/num_anomalies)
+            'progress', float(redis.hget(queue_item, 'progress')) + (x/num_objects)
         )
 
-    def find_contours_of_anomaly(self) -> List[List[Any]]:
+    def find_contours_of_object(self) -> List[List[Any]]:
         '''
-        Метод, который находит контуры аномалий на изображении и возвращает список списков точек.
+        Метод, который находит контуры объектов на изображении и возвращает список списков точек.
         '''
         pass
 
-    def find_geo_polygons(self, contours_of_anomaly):
+    def find_geo_polygons(self, contours_of_object):
         '''
-        Метод, который преобразовывает контуры аномалии в геопривязанные контуры и 
+        Метод, который преобразовывает контуры объекты в геопривязанные контуры и 
         сохраняет их в поле polygons класса.
         '''
         coord_transformer = CoordintesTransformer(self.image_bytes)
 
-        step_progress = 35 / (len(contours_of_anomaly) + 1)
+        step_progress = 35 / (len(contours_of_object) + 1)
 
         self.polygons = []
-        for line in contours_of_anomaly:
+        for line in contours_of_object:
             # Преобразовываем координаты каждой точки из пикселей в широту и долготу.
             line_arr = []
 
@@ -74,7 +74,7 @@ class AnomalyBase:
 
     def find_area(self, contours):
         '''
-        Метод, который находит площадь каждой аномалии заданного типа.
+        Метод, который находит площадь каждой объекты заданного типа.
         '''
         sptial_res = self.__find_spatial_resolution()
 
@@ -89,7 +89,7 @@ class AnomalyBase:
 
     def filter_polygons_by_area(self, min_area):
         '''
-        Метод, который фильтрует найденные аномалии и удаляет те, 
+        Метод, который фильтрует найденные объекты и удаляет те, 
         площадь которых меньше, чем минимальная площадь (min_area).
         '''
         i = 0
@@ -103,25 +103,25 @@ class AnomalyBase:
     @staticmethod
     def create_and_process(img_id):
         '''
-        Метод, который создает объект необходимого класса аномалии, выполняет её поиск (process_anomaly) 
+        Метод, который создает объект необходимого класса объекты, выполняет её поиск (process_object) 
         и сохранение в базе данных (after_end_of_process)
         '''
         pass
 
     @staticmethod
-    def process_anomaly(anomaly):
+    def process_object(object):
         '''
-        Полный поиск аномалии и сохранение в базе данных.
+        Полный поиск объекты и сохранение в базе данных.
 
-        anomaly - один из наследников класса AnomalyBase.
+        object - один из наследников класса ObjectBase.
         '''
-        contours = anomaly.find_contours_of_anomaly()
-        anomaly.find_geo_polygons(contours)
-        anomaly.find_area(contours)
+        contours = object.find_contours_of_object()
+        object.find_geo_polygons(contours)
+        object.find_area(contours)
     
     def after_end_of_process(self):
         '''
-        Метод, который сохраняет объект найденные аномалии одного типа в базу данных.
+        Метод, который сохраняет объект найденные объекты одного типа в базу данных.
         '''
         db = local.db
         redis = local.redis
@@ -129,29 +129,29 @@ class AnomalyBase:
         queue_item = f'queue:{self.img_id}'
         
         if (len(self.polygons) > 0):
-            # Формируем словарь найденных аномалий.
-            anomaly_dict = {
+            # Формируем словарь найденных объектов.
+            object_dict = {
                 'name': self.name,
                 'color': self.color,
                 'polygons': self.polygons,
                 'area': self.area
             }
 
-            # Добавляем словарь найденных аномалий в базу данных.
-            anomalies_list = image_info['anomalies']
-            anomalies_list.append(anomaly_dict)
-            db.images.update_one({"_id": image_info['_id']}, {"$set": {"anomalies": anomalies_list}})
+            # Добавляем словарь найденных объектов в базу данных.
+            objects_list = image_info['objects']
+            objects_list.append(object_dict)
+            db.images.update_one({"_id": image_info['_id']}, {"$set": {"objects": objects_list}})
             db.images.update_one({"_id": image_info['_id']}, {"$set": {"detect_date": str(arrow.now().to('UTC'))}})
 
-        # Удаляем запись в redis-е, если обработка всех аномалий завершились.
+        # Удаляем запись в redis-е, если обработки всех объектов завершились.
         redis.hset(queue_item, 'processing_functions', int(redis.hget(queue_item, 'processing_functions')) - 1)
         if int(redis.hget(queue_item, 'processing_functions')) == 0:
             redis.delete(queue_item)
             db.images.update_one({"_id": image_info['_id']}, {"$set": {"ready": True}})
 
-    def get_anomaly_by_index(self, index):
+    def get_object_by_index(self, index):
         '''
-        Метод, который возвращает одну аномалию из найденных на изображении.
+        Метод, который возвращает одну объект из найденных на изображении.
         '''
         return {
             'index': index,

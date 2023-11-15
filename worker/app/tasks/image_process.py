@@ -2,8 +2,8 @@ from bson import ObjectId
 
 from app import app
 from app.db import local
-from app.image_processing.anomalies.anomaly_forest import AnomalyForest
-from app.image_processing.anomalies.anomaly_deforestation import AnomalyDeforestation
+from app.image_processing.objects.object_forest import ObjectForest
+from app.image_processing.objects.object_deforestation import ObjectDeforestation
 
 
 @app.task(name='image_process', queue="image_process")
@@ -13,8 +13,8 @@ def process_image(img_id: str):
     image_info = db.images.find_one(ObjectId(img_id))
     
     # 
-    ## Список аномалий для поиска
-    anomalies = [AnomalyForest, AnomalyDeforestation]
+    ## Список объектов для поиска
+    objects = [ObjectForest, ObjectDeforestation]
     ## 
     # 
 
@@ -26,13 +26,13 @@ def process_image(img_id: str):
         'name': image_info['name'],
         'uploadDate': image_info['upload_date'],
         'status': 'enqueued',
-        'processing_functions_immut': len(anomalies),
-        'processing_functions': len(anomalies)
+        'processing_functions_immut': len(objects),
+        'processing_functions': len(objects)
     })
     redis.hset(queue_item, 'status', 'processing')
 
-    # Запуск обработчиков аномалий.
-    for anomaly_class in anomalies:
-        anomaly_class.create_and_process.delay(img_id)
+    # Запуск обработчиков объектов.
+    for object_class in objects:
+        object_class.create_and_process.delay(img_id)
 
     return "Done"

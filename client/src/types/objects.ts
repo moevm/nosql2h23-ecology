@@ -1,23 +1,23 @@
-export interface AnomalyInfo {
+export interface ObjectInfo {
   id: string;
   name: string;
-  anomalyIndex: string;
+  objectIndex: string;
   area: number;
   uploadDate: string;
   detectDate: string;
 }
 
-export interface AnomalyData {
+export interface ObjectData {
   id: string;
   name: string;
-  anomalyIndex: string;
+  objectIndex: string;
   area: number;
   coordinates: [number, number];
   uploadDate: string;
   detectDate: string;
 }
 
-export interface AnomaliesMapData {
+export interface ObjectsMapData {
   name: string;
   color: string;
   polygons: number[][][];

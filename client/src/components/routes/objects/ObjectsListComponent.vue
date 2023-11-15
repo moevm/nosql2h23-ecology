@@ -1,6 +1,6 @@
 <template>
   <div class="container-lg mt-3">
-    <h3>База аномалий</h3>
+    <h3>База объектов</h3>
     <AgGridVue
       class="ag-theme-alpine"
       :column-defs="columnDefs"
@@ -19,18 +19,18 @@ import {
   getActionsColDef,
   getDefaultGridOptions,
 } from "@/ag-grid/factory";
-import { AnomalyInfo } from "@/types/anomalies";
-import { getAnomaliesInfo } from "@/components/routes/anomalies/api";
+import { ObjectInfo } from "@/types/objects";
+import { getObjectsInfo } from "@/components/routes/objects/api";
 import { dateFormatter } from "@/ag-grid/formatters";
 import { routeNames } from "@/router";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
 
-const columnDefs: ColDef<AnomalyInfo>[] = [
+const columnDefs: ColDef<ObjectInfo>[] = [
   { headerName: "Id", field: "id", flex: 2, minWidth: 120 },
   { headerName: "Название", field: "name", flex: 4, minWidth: 180 },
-  { headerName: "Индекс", field: "anomalyIndex", flex: 4, minWidth: 180 },
+  { headerName: "Индекс", field: "objectIndex", flex: 4, minWidth: 180 },
   { headerName: "Площадь", field: "area", flex: 4, minWidth: 120 },
   {
     headerName: "Дата загрузки",
@@ -49,16 +49,16 @@ const columnDefs: ColDef<AnomalyInfo>[] = [
   {
     ...getActionsColDef([
       {
-        tooltip: "Открыть аномалию",
+        tooltip: "Открыть объект",
         icon: "bi bi-radioactive",
         button: "btn-danger",
         onClicked: (action, data) =>
           router.push({
-            name: routeNames.Anomaly,
+            name: routeNames.Object,
             params: {
               id: data.id,
               name: data.name,
-              anomalyIndex: data.anomalyIndex,
+              objectIndex: data.objectIndex,
             },
           }),
       },
@@ -66,12 +66,12 @@ const columnDefs: ColDef<AnomalyInfo>[] = [
   },
 ];
 
-const options: GridOptions<AnomalyInfo> = {
+const options: GridOptions<ObjectInfo> = {
   ...getDefaultGridOptions(),
   domLayout: "autoHeight",
 };
 
-const data = await getAnomaliesInfo();
+const data = await getObjectsInfo();
 </script>
 
 <style scoped lang="scss"></style>

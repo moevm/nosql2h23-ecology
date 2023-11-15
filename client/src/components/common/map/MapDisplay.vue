@@ -5,10 +5,10 @@
 <script setup lang="ts">
 import {
   getXMLinfo,
-  getAnomalies,
+  getObjects,
   initMap,
   addTileLayerMap,
-  addAnomalies,
+  addObjects,
 } from "@/components/common/map/api";
 import { onMounted } from "vue";
 import L from "leaflet";
@@ -22,7 +22,7 @@ defineExpose({ addMarker, removeMarker, flyToCoordinates });
 
 const props = defineProps<{ id: string }>();
 const xmlImageInfoDoc = await getXMLinfo(props.id);
-let anomaliesList = await getAnomalies(props.id);
+let objectsList = await getObjects(props.id);
 
 const emit = defineEmits<{ (e: "map-ready"): void }>();
 
@@ -40,8 +40,8 @@ onMounted(() => {
   });
 
   mapAndControl = initMap();
-  if (anomaliesList) {
-    addAnomalies(mapAndControl.map, mapAndControl.controlLayer, anomaliesList);
+  if (objectsList) {
+    addObjects(mapAndControl.map, mapAndControl.controlLayer, objectsList);
   }
 
   if (xmlImageInfoDoc) {

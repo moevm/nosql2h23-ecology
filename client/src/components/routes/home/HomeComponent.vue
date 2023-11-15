@@ -2,7 +2,7 @@
   <div class="container">
     <h4 class="text-center mt-3">MSE 12 Ecology</h4>
     <h5 class="text-center">
-      Сервис обработки спутниковых карт и поиска аномалий
+      Сервис обработки спутниковых карт и поиска объектов
     </h5>
 
     <div id="accordion" class="accordion mt-2">
@@ -97,18 +97,17 @@
             class="accordion-button collapsed"
             type="button"
             data-bs-toggle="collapse"
-            data-bs-target="#anomalies"
+            data-bs-target="#objects"
           >
-            Аномалии
+            Объекты
           </button>
         </h2>
-        <div id="anomalies" class="accordion-collapse collapse">
+        <div id="objects" class="accordion-collapse collapse">
           <div class="accordion-body">
             В разделе
-            <span class="text-primary">Аномалии</span>
-            находятся все найденные области аномалий на полностью обработанных
-            изображениях. Там же можно открыть на просмотр одну отдельную
-            аномалию.
+            <span class="text-primary">Объекты</span>
+            находятся все найденные области выделяемых объектов на полностью обработанных
+            изображениях. Там же можно открыть на просмотр один отдельный объект.
           </div>
         </div>
       </div>
@@ -119,17 +118,17 @@
             class="accordion-button collapsed"
             type="button"
             data-bs-toggle="collapse"
-            data-bs-target="#anomaly"
+            data-bs-target="#object"
           >
-            Просмотр аномалии
+            Просмотр объекта
           </button>
         </h2>
-        <div id="anomaly" class="accordion-collapse collapse">
+        <div id="object" class="accordion-collapse collapse">
           <div class="accordion-body">
-            В режиме просмотра аномалии можно посмотреть все параметры найденной
-            аномалии, отметить её на карте с помощью клавиши "Показать на
-            карте", а так же открыть отчет изображения, на котором была найдена
-            аномалия.
+            В режиме просмотра объекта можно посмотреть все параметры найденного
+            объекта, отметить его на карте с помощью клавиши "Показать на
+            карте", а так же открыть отчет изображения, на котором был найден
+            объект.
           </div>
         </div>
       </div>

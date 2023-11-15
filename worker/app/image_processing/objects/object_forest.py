@@ -3,11 +3,11 @@ from bson import ObjectId
 
 from app import app
 from app.db import local
-from app.image_processing.anomalies.anomaly_base import AnomalyBase
+from app.image_processing.objects.object_base import ObjectBase
 from app.image_processing.utility import morph_operations, find_contours, get_image_RGB
 
 
-class AnomalyForest(AnomalyBase):
+class ObjectForest(ObjectBase):
     '''
     Класс для нахождения леса на изображении.
     '''
@@ -17,7 +17,7 @@ class AnomalyForest(AnomalyBase):
         self.name = 'Forest'
         self.color = 'green'
     
-    def find_contours_of_anomaly(self):
+    def find_contours_of_object(self):
         '''
         Метод Otsu выделения выделяющихся объектов на изображении. Возвращает контуры найденных объектов.
         '''
@@ -48,14 +48,14 @@ class AnomalyForest(AnomalyBase):
     @app.task(name='forest_find', queue="image_process")
     def create_and_process(img_id):
         db = local.db
-        map_fs = local.map_fs
+        maps_fs = local.maps_fs
         image_info = db.images.find_one(ObjectId(img_id))
 
         # Получаем саму картинку из GridFS.
-        image_bytes = map_fs.get(ObjectId(image_info['fs_id'])).read()
+        image_bytes = maps_fs.get(ObjectId(image_info['fs_id'])).read()
 
-        forest_anomaly = AnomalyForest(img_id, image_bytes)
-        AnomalyBase.process_anomaly(forest_anomaly)
-        forest_anomaly.filter_polygons_by_area(10)
-        forest_anomaly.after_end_of_process()
+        forest_object = ObjectForest(img_id, image_bytes)
+        ObjectBase.process_object(forest_object)
+        forest_object.filter_polygons_by_area(10)
+        forest_object.after_end_of_process()
         return "Processing completed"

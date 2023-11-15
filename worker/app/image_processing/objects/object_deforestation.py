@@ -4,11 +4,11 @@ from bson import ObjectId
 
 from app import app
 from app.db import local
-from app.image_processing.anomalies.anomaly_base import AnomalyBase
+from app.image_processing.objects.object_base import ObjectBase
 from app.image_processing.utility import connected_components, find_contours, get_image_RGB
 
 
-class AnomalyDeforestation(AnomalyBase):
+class ObjectDeforestation(ObjectBase):
     '''
     Класс для нахождения вырубок на изображении.
     '''
@@ -18,7 +18,7 @@ class AnomalyDeforestation(AnomalyBase):
         self.name = 'Deforestaion'
         self.color = 'red'
     
-    def find_contours_of_anomaly(self):
+    def find_contours_of_object(self):
         '''
         Использование нейросети для нахождения областей вырубок.
         '''
@@ -53,14 +53,14 @@ class AnomalyDeforestation(AnomalyBase):
     @app.task(name='deforestation_find', queue="image_process")
     def create_and_process(img_id):
         db = local.db
-        map_fs = local.map_fs
+        maps = local.maps
         image_info = db.images.find_one(ObjectId(img_id))
         
         # Получаем саму картинку из GridFS.
-        image_bytes = map_fs.get(ObjectId(image_info['fs_id'])).read()
+        image_bytes = maps.get(ObjectId(image_info['fs_id'])).read()
 
-        deforestation_anomaly = AnomalyDeforestation(img_id, image_bytes)
-        AnomalyBase.process_anomaly(deforestation_anomaly)
-        deforestation_anomaly.filter_polygons_by_area(10)
-        deforestation_anomaly.after_end_of_process()
+        deforestation_object = ObjectDeforestation(img_id, image_bytes)
+        ObjectBase.process_object(deforestation_object)
+        deforestation_object.filter_polygons_by_area(10)
+        deforestation_object.after_end_of_process()
         return "Processing completed"

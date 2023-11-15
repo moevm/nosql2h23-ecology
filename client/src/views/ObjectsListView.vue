@@ -1,6 +1,6 @@
 <template>
   <Suspense>
-    <AnomaliesListComponent />
+    <ObjectsListComponent />
     <template #fallback>
       <LoadingSpinner />
     </template>
@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import AnomaliesListComponent from "@/components/routes/anomalies/AnomaliesListComponent.vue";
+import ObjectsListComponent from "@/components/routes/objects/ObjectsListComponent.vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
 </script>
 
