@@ -12,8 +12,8 @@ from app.tasks import slice
 
 
 db = LocalProxy(get_db)
-tiles = LocalProxy(get_tiles)
-maps = LocalProxy(get_maps)
+tiles_fs = LocalProxy(get_tiles)
+maps_fs = LocalProxy(get_maps)
 redis: StrictRedis = LocalProxy(get_redis)
 
 images_bp = Blueprint('images_bp', __name__, url_prefix="/images")
@@ -27,7 +27,7 @@ def get_images_list():
             "id": str(img["_id"]),
             "name": img["name"],
             'uploadDate': img["upload_date"],
-            'size': maps.find_one({'_id': img["fs_id"]}).length,
+            'size': maps_fs.find_one({'_id': img["fs_id"]}).length,
             "ready": img["ready"],
             "sliced": img["sliced"]
         })
@@ -47,7 +47,7 @@ def index(img_id):
 @images_bp.route('/upload_image', methods=['POST'])
 def add_image():
     image = request.files['image']
-    file_id = maps.put(image, filename=image.filename, chunk_size=256 * 1024)
+    file_id = maps_fs.put(image, filename=image.filename, chunk_size=256 * 1024)
     img_name = request.form.get('name')
     item = {
         "tile_map_resource": None,
@@ -77,9 +77,9 @@ def delete_image(img_id):
 
         db.images.delete_one({"_id": ObjectId(img_id)})
 
-        maps.delete(fs_id)
-        for tile in tiles.find({"image_id": ObjectId(img_id)}):
-            tiles.delete(tile._id)
+        maps_fs.delete(fs_id)
+        for tile in tiles_fs.find({"image_id": ObjectId(img_id)}):
+            tiles_fs.delete(tile._id)
 
         socketio.emit("images", get_images_list())
         return jsonify({'message': 'Image deleted successfully'})
@@ -89,7 +89,7 @@ def delete_image(img_id):
 # Маршрут для leaflet-а, возвращает кусочки для отображения.
 @images_bp.route("/tile/<string:img_id>/<int:z>/<int:x>/<int:y>", methods=['GET'])
 def get_tile(img_id, z, x, y):
-    tile = tiles.find_one({'image_id': ObjectId(img_id), 'z': z, 'x': x, 'y': y})
+    tile = tiles_fs.find_one({'image_id': ObjectId(img_id), 'z': z, 'x': x, 'y': y})
     if tile:
         return send_file(io.BytesIO(tile.read()), mimetype='image/png')
     else:
@@ -99,7 +99,7 @@ def get_tile(img_id, z, x, y):
 @images_bp.route('/<string:img_id>', methods=['GET'])
 def get_image(img_id):
     image_info = db.images.find_one(ObjectId(img_id))
-    image_file = tiles.get(image_info["fs_id"])
+    image_file = tiles_fs.get(image_info["fs_id"])
     return send_file(io.BytesIO(image_file), mimetype='image/tiff')
 
 

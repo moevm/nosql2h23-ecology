@@ -8,8 +8,8 @@ from app.db import get_db, get_tiles, get_maps, get_redis
 
 
 db = LocalProxy(get_db)
-tiles = LocalProxy(get_tiles)
-maps = LocalProxy(get_maps)
+tiles_fs = LocalProxy(get_tiles)
+maps_fs = LocalProxy(get_maps)
 redis: StrictRedis = LocalProxy(get_redis)
 
 objects_bp = Blueprint('objects_bp', __name__, url_prefix="/objects")
