@@ -32,7 +32,6 @@ export const routes: RouteRecordRaw[] = [
     component: () => import("@/views/QueueView.vue"),
   },
   {
-  {
     name: routeNames.ObjectsList,
     path: routePaths[routeNames.ObjectsList],
     component: () => import("@/views/ObjectsListView.vue"),
