@@ -4,12 +4,6 @@
       Просмотр аномалии {{ name }} номер {{ anomalyIndex }} на карте №{{ id }}
     </h2>
     <div class="row justify-content-end">
-      <router-link
-        class="col-auto"
-        :to="{ name: routeNames.Report, params: { id: anomalyData.id } }"
-      >
-        <button class="btn btn-primary">Открыть отчёт</button>
-      </router-link>
     </div>
 
     <AgGridVue

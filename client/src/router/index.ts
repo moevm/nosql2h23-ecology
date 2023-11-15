@@ -3,11 +3,9 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 export const routeNames = {
   MapsList: "Maps",
   Queue: "Queue",
-  ReportsList: "Reports",
   AnomaliesList: "Anomalies",
   Upload: "Upload",
   Map: "Map",
-  Report: "Report",
   Anomaly: "Anomaly",
   Home: "Home",
 };
@@ -15,11 +13,9 @@ export const routeNames = {
 export const routePaths = {
   [routeNames.MapsList]: "/",
   [routeNames.Queue]: "/queue",
-  [routeNames.ReportsList]: "/reports",
   [routeNames.AnomaliesList]: "/anomalies",
   [routeNames.Upload]: "/upload",
   [routeNames.Map]: "/map/:id/:name?/:anomalyIndex?",
-  [routeNames.Report]: "/report/:id",
   [routeNames.Anomaly]: "/anomaly/:id/:name/:anomalyIndex",
   [routeNames.Home]: "/home",
 };
@@ -34,11 +30,6 @@ export const routes: RouteRecordRaw[] = [
     name: routeNames.Queue,
     path: routePaths[routeNames.Queue],
     component: () => import("@/views/QueueView.vue"),
-  },
-  {
-    name: routeNames.ReportsList,
-    path: routePaths[routeNames.ReportsList],
-    component: () => import("@/views/ReportsListView.vue"),
   },
   {
     name: routeNames.AnomaliesList,
@@ -59,12 +50,6 @@ export const routes: RouteRecordRaw[] = [
       name: route.params.name,
       anomalyIndex: route.params.anomalyIndex,
     }),
-  },
-  {
-    name: routeNames.Report,
-    path: routePaths[routeNames.Report],
-    component: () => import("@/views/ReportView.vue"),
-    props: (route) => ({ id: route.params.id }),
   },
   {
     name: routeNames.Anomaly,

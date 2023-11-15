@@ -97,49 +97,6 @@
             class="accordion-button collapsed"
             type="button"
             data-bs-toggle="collapse"
-            data-bs-target="#reports"
-          >
-            Отчёты
-          </button>
-        </h2>
-        <div id="reports" class="accordion-collapse collapse">
-          <div class="accordion-body">
-            В разделе
-            <span class="text-primary">Отчёты</span>
-            находятся список отчётов уже обработанных карт, на которых найдены
-            аномалии. Здесь можно открыть карту изображения, к которому
-            относится отчет или перейти в просмотр самого отчёта по аномалиям
-            найденным на изображении.
-          </div>
-        </div>
-      </div>
-
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button
-            class="accordion-button collapsed"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#reports-view"
-          >
-            Просмотр отчёта
-          </button>
-        </h2>
-        <div id="reports-view" class="accordion-collapse collapse">
-          <div class="accordion-body">
-            В просмотре отчёта отображаются данные по всем найденным на
-            изображении аномалиям. Там же можно открыть на просмотр одну
-            отдельную аномалию или отобразить её на карте.
-          </div>
-        </div>
-      </div>
-
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button
-            class="accordion-button collapsed"
-            type="button"
-            data-bs-toggle="collapse"
             data-bs-target="#anomalies"
           >
             Аномалии

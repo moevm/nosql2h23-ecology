@@ -93,14 +93,6 @@ const columnDefs: ColDef<MapInfo>[] = [
           router.push({ name: routeNames.Map, params: { id: data.id } }),
       },
       {
-        tooltip: "Открыть отчёт",
-        icon: "bi bi-file-text",
-        button: "btn-primary",
-        hide: (data) => !data.ready,
-        onClicked: (action, data) =>
-          router.push({ name: routeNames.Report, params: { id: data.id } }),
-      },
-      {
         tooltip: "Удалить карту",
         icon: "bi bi-trash",
         button: "btn-danger",

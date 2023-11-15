@@ -3,12 +3,6 @@
     <h2 class="text-center mt-2 text-primary">Просмотр карты №{{ id }}</h2>
     <div v-if="mapData && mapData.length" class="row justify-content-between">
       <h3 class="col">Аномалии</h3>
-      <router-link
-        class="col-auto"
-        :to="{ name: routeNames.Report, params: { id: id } }"
-      >
-        <button class="btn btn-primary">Открыть отчёт</button>
-      </router-link>
     </div>
     <AgGridVue
       v-if="mapData && mapData.length"
