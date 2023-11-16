@@ -5,6 +5,7 @@ from app import app
 from app.image_processing.geotiff_slicer.slice2tiles import sliceToTiles
 from celery.utils.log import get_task_logger
 from app.db import local
+from app import config
 
 logger = get_task_logger(__name__)
 
@@ -31,7 +32,10 @@ def slice(img_id: str):
     # Нарезаем на фрагменты.
     sliceToTiles(
         img_id, image_bytes, f'./{img_id}',
-        optionsSliceToTiles={"nb_processes": max(1, multiprocessing.cpu_count() // (1 + slicers))}
+        optionsSliceToTiles= {
+            "nb_processes": max(1, multiprocessing.cpu_count() // (1 + slicers)),
+            "zoom": [config.MIN_ZOOM, config.MAX_ZOOM]
+        }
     )
 
     # Удаляем фрагменты, если они уже были в GridFS.

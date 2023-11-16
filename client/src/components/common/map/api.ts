@@ -1,8 +1,9 @@
 import axios, { AxiosError } from "axios";
 import L, { LatLngExpression, Polygon } from "leaflet";
 
-import { baseURL } from "@/api";
+import { baseURL, map_zoom } from "@/api";
 import { ObjectsMapData } from "@/types/objects";
+
 
 export async function getXMLinfo(id: string): Promise<Document | void> {
   return axios
@@ -37,8 +38,8 @@ export function initMap() {
   const map: L.Map = L.map("map", {
     center: [59.9375, 30.308611],
     zoom: 10,
-    minZoom: 5,
-    maxZoom: 15,
+    minZoom: map_zoom[0],
+    maxZoom: map_zoom[1],
     layers: [osm],
   });
 
