@@ -15,7 +15,7 @@ class ObjectBase:
         self.img_id = img_id
         self.image_bytes = image_bytes
         self.polygons = []
-        self.area = []
+        self.area = [] #Add to scheme
         
         self.name = "Base Object"
         self.color = "black"
@@ -125,29 +125,28 @@ class ObjectBase:
         '''
         db = local.db
         redis = local.redis
-        image_info = db.images.find_one(ObjectId(self.img_id))
+        maps_fs = local.maps_fs
+        image_info = maps_fs.files.find_one(ObjectId(self.img_id))
         queue_item = f'queue:{self.img_id}'
         
         if (len(self.polygons) > 0):
-            # Формируем словарь найденных объектов.
-            object_dict = {
-                'name': self.name,
-                'color': self.color,
-                'polygons': self.polygons,
-                'area': self.area
-            }
 
             # Добавляем словарь найденных объектов в базу данных.
-            objects_list = image_info['objects']
-            objects_list.append(object_dict)
-            db.images.update_one({"_id": image_info['_id']}, {"$set": {"objects": objects_list}})
-            db.images.update_one({"_id": image_info['_id']}, {"$set": {"detect_date": str(arrow.now().to('UTC'))}})
+
+            for polygon in self.polygons:
+                db.objects.insert_one({
+                    "type": self.name,
+                    "name": self.name,
+                    "color": self.color,
+                    "update": "user change history", #FIX ME
+                    "location": polygon
+                })
 
         # Удаляем запись в redis-е, если обработки всех объектов завершились.
         redis.hset(queue_item, 'processing_functions', int(redis.hget(queue_item, 'processing_functions')) - 1)
         if int(redis.hget(queue_item, 'processing_functions')) == 0:
             redis.delete(queue_item)
-            db.images.update_one({"_id": image_info['_id']}, {"$set": {"ready": True}})
+            maps_fs.files.update_one({"_id": image_info['_id']}, {"$set": {"ready": True}})
 
     def get_object_by_index(self, index):
         '''

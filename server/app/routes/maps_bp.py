@@ -77,14 +77,6 @@ def delete_map(map_id):
 
 
 # Маршрут для leaflet-а, возвращает кусочки для отображения.
-@maps_bp.route("/tile/<string:map_id>/<int:z>/<int:x>/<int:y>", methods=['GET'])
-def get_tile(map_id, z, x, y):
-    tile = tiles_fs.files.find_one({'map_id': ObjectId(map_id), 'z': z, 'x': x, 'y': y})
-    if tile:
-        return send_file(io.BytesIO(tile.read()), mimetype='image/png')
-    else:
-        return 'OK'
-
 
 @maps_bp.route('/<string:map_id>', methods=['GET'])
 def get_image(map_id):

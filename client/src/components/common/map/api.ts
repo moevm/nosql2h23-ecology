@@ -6,7 +6,7 @@ import { ObjectsMapData } from "@/types/objects";
 
 export async function getXMLinfo(id: string): Promise<Document | void> {
   return axios
-    .get<string>(baseURL + "/images/tile_map_resource/" + id)
+    .get<string>(baseURL + "/maps_bp/tile_map_resource/" + id)
     .then((response) => {
       const parser: DOMParser = new DOMParser();
       return parser.parseFromString(response.data, "text/xml");

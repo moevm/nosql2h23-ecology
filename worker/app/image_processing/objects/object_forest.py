@@ -49,10 +49,10 @@ class ObjectForest(ObjectBase):
     def create_and_process(img_id):
         db = local.db
         maps_fs = local.maps_fs
-        image_info = db.images.find_one(ObjectId(img_id))
+        map_file = maps_fs.find_one(ObjectId(img_id))
 
         # Получаем саму картинку из GridFS.
-        image_bytes = maps_fs.get(ObjectId(image_info['fs_id'])).read()
+        image_bytes = maps_fs.get(ObjectId(map_file['fs_id'])).read()
 
         forest_object = ObjectForest(img_id, image_bytes)
         ObjectBase.process_object(forest_object)
