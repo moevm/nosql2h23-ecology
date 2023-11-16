@@ -14,3 +14,4 @@ redis: StrictRedis = LocalProxy(get_redis)
 
 tiles_bp = Blueprint('tiles_bp', __name__, url_prefix="/tiles")
 
+

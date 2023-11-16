@@ -7,10 +7,11 @@ from app.image_processing.objects.object_deforestation import ObjectDeforestatio
 
 
 @app.task(name='image_process', queue="image_process")
-def process_image(img_id: str):
+def process_image(map_id: str):
     db = local.db
     redis = local.redis
-    image_info = db.images.find_one(ObjectId(img_id))
+    maps_fs = local.maps_fs
+    map_file = maps_fs.files.find_one(ObjectId(map_id))
     
     # 
     ## Список объектов для поиска
@@ -19,12 +20,12 @@ def process_image(img_id: str):
     # 
 
     # Создаем запись в redis-е для отображения очереди на клиенте.
-    queue_item = f'queue:{img_id}'
+    queue_item = f'queue:{map_id}'
     redis.hset(queue_item, mapping={
-        'id': str(img_id),
+        'id': str(map_id),
         'progress': 0,
-        'name': image_info['name'],
-        'uploadDate': image_info['upload_date'],
+        'name': map_file['name'],
+        'uploadDate': map_file['update'],
         'status': 'enqueued',
         'processing_functions_immut': len(objects),
         'processing_functions': len(objects)
@@ -33,6 +34,6 @@ def process_image(img_id: str):
 
     # Запуск обработчиков объектов.
     for object_class in objects:
-        object_class.create_and_process.delay(img_id)
+        object_class.create_and_process.delay(map_id)
 
     return "Done"
