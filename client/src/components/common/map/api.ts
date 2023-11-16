@@ -92,29 +92,6 @@ export function addTileLayerMap(
       ), // minx
     ],
   ]);
-
-  // Set zoom according to tile layer parameters.
-  map.setZoom(
-    parseInt(
-      xmlImageInfoDoc.getElementsByTagName("TileSet")[0].attributes[0]
-        .nodeValue as string
-    )
-  );
-
-  map.setMinZoom(
-    parseInt(
-      xmlImageInfoDoc.getElementsByTagName("TileSet")[0].attributes[0]
-        .nodeValue as string
-    )
-  );
-
-  map.setMaxZoom(
-    parseInt(
-      xmlImageInfoDoc.getElementsByTagName("TileSet")[
-        xmlImageInfoDoc.getElementsByTagName("TileSet").length - 1
-      ].attributes[0].nodeValue as string
-    )
-  );
 }
 
 export function addObjects(

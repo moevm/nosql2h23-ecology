@@ -16,13 +16,19 @@ import "leaflet/dist/leaflet.css";
 import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import shadowUrl from "leaflet/dist/images/marker-shadow.png";
+import { ObjectsMapData } from "@/types/objects";
+
 
 let mapAndControl: { map: L.Map; controlLayer: L.Control.Layers } | null = null;
 defineExpose({ addMarker, removeMarker, flyToCoordinates });
 
-const props = defineProps<{ id: string }>();
-const xmlImageInfoDoc = await getXMLinfo(props.id);
-let objectsList = await getObjects(props.id);
+const props = defineProps<{ id?: string }>();
+let xmlImageInfoDoc: void | Document;
+let objectsList: void | ObjectsMapData[];
+if (props.id) {
+  xmlImageInfoDoc = await getXMLinfo(props.id);
+  objectsList = await getObjects(props.id);
+}
 
 const emit = defineEmits<{ (e: "map-ready"): void }>();
 
@@ -44,7 +50,7 @@ onMounted(() => {
     addObjects(mapAndControl.map, mapAndControl.controlLayer, objectsList);
   }
 
-  if (xmlImageInfoDoc) {
+  if (xmlImageInfoDoc && props.id) {
     addTileLayerMap(
       mapAndControl.map,
       mapAndControl.controlLayer,

@@ -1,6 +1,5 @@
 <template>
   <div class="container-lg">
-    <h2 class="text-center mt-2 text-primary">Просмотр карты №{{ id }}</h2>
     <div v-if="mapData && mapData.length" class="row justify-content-between">
       <h3 class="col">Объекты</h3>
     </div>
@@ -35,9 +34,10 @@ import L from "leaflet";
 
 import MapDisplay from "@/components/common/map/MapDisplay.vue";
 
+
 const router = useRouter();
 const props = defineProps<{
-  id: string;
+  id?: string;
   name?: string;
   objectIndex?: string;
 }>();
@@ -106,7 +106,10 @@ function onMapReady() {
   }
 }
 
-const mapData = await getMapData(props.id);
+let mapData: ObjectData[];
+if (props.id) {
+  const mapData = await getMapData(props.id);
+}
 </script>
 
 <style scoped lang="scss"></style>

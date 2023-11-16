@@ -15,7 +15,7 @@ export const routePaths = {
   [routeNames.Queue]: "/queue",
   [routeNames.ObjectsList]: "/objects",
   [routeNames.Upload]: "/upload",
-  [routeNames.Map]: "/map/:id/:name?/:objectIndex?",
+  [routeNames.Map]: "/map/:id?/:name?/:objectIndex?",
   [routeNames.Object]: "/object/:id/:name/:objectIndex",
   [routeNames.Home]: "/home",
 };
