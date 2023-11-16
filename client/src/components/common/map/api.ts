@@ -6,7 +6,7 @@ import { ObjectsMapData } from "@/types/objects";
 
 export async function getXMLinfo(id: string): Promise<Document | void> {
   return axios
-    .get<string>(baseURL + "/maps_bp/tile_map_resource/" + id)
+    .get<string>(baseURL + "/maps/tile_map_resource/" + id)
     .then((response) => {
       const parser: DOMParser = new DOMParser();
       return parser.parseFromString(response.data, "text/xml");
@@ -22,7 +22,7 @@ export async function getObjects(
   id: string
 ): Promise<ObjectsMapData[] | void> {
   return (
-    await axios.get<ObjectsMapData[]>(baseURL + "/images/objects/" + id)
+    await axios.get<ObjectsMapData[]>(baseURL + "/objects/" + id)
   ).data;
 }
 
@@ -61,7 +61,7 @@ export function addTileLayerMap(
 ) {
   // Overlay layers (TMS).
   const lyr: L.Layer = L.tileLayer(
-    baseURL + "/images/tile/" + id + "/{z}/{x}/{y}",
+    baseURL + "/tiles/tile" + id + "/{z}/{x}/{y}",
     { tms: true, opacity: 1, attribution: "" }
   );
 
