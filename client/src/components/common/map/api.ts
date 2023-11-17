@@ -1,49 +1,49 @@
-import axios, { AxiosError } from "axios";
-import L, { LatLngExpression, Polygon } from "leaflet";
+import axios from "axios";
+import L, { LatLngBounds, LatLngExpression, Polygon } from "leaflet";
 
 import { baseURL, map_zoom } from "@/api";
+import { MapInfo } from "@/types/maps";
 import { ObjectsMapData } from "@/types/objects";
 
 
-export async function getXMLinfo(id: string): Promise<Document | void> {
-  return axios
-    .get<string>(baseURL + "/images/tile_map_resource/" + id)
-    .then((response) => {
-      const parser: DOMParser = new DOMParser();
-      return parser.parseFromString(response.data, "text/xml");
-    })
-    .catch((err: AxiosError) => {
-      if (!err.response || (err.response && err.response.status !== 404)) {
-        throw err;
-      }
-    });
-}
-
-export async function getObjects(
-  id: string
-): Promise<ObjectsMapData[] | void> {
+export async function getMaps(
+  y: number,
+  x: number,
+  r: number
+): Promise<MapInfo[] | void> {
   return (
-    await axios.get<ObjectsMapData[]>(baseURL + "/images/objects/" + id)
+    await axios.get<MapInfo[]>(baseURL + "/images/near/" + y + "/" + x + "/" + r)
   ).data;
 }
 
-export function initMap() {
+
+export async function getObjects(
+  y: number,
+  x: number,
+  r: number
+): Promise<ObjectsMapData[] | void> {
+  return (
+    await axios.get<ObjectsMapData[]>(baseURL + "/objects/near/" + y + "/" + x + "/" + r)
+  ).data;
+}
+
+export function initMap(y: number, x: number) {
   //  OpenStreetMap.
-  const osm: L.Layer = L.tileLayer("https://{s}.tile.osm.org/{z}/{x}/{y}.png", {
+  const osmLayer: L.Layer = L.tileLayer("https://{s}.tile.osm.org/{z}/{x}/{y}.png", {
     attribution:
       "&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors",
   });
 
   // Map.
   const map: L.Map = L.map("map", {
-    center: [59.9375, 30.308611],
+    center: [y, x],
     zoom: 10,
     minZoom: map_zoom[0],
     maxZoom: map_zoom[1],
-    layers: [osm],
+    layers: [osmLayer],
   });
 
-  const basemaps = { OpenStreetMap: osm };
+  const basemaps = { OpenStreetMap: osmLayer };
 
   // Add base layers
   const controlLayer: L.Control.Layers = L.control.layers(basemaps, undefined, {
@@ -51,64 +51,42 @@ export function initMap() {
   });
   controlLayer.addTo(map);
 
-  return { map: map, controlLayer: controlLayer };
+  return { map: map, controlLayer: controlLayer, osmLayer: osmLayer};
 }
 
-export function addTileLayerMap(
-  map: L.Map,
-  controlLayer: L.Control.Layers,
-  id: string,
-  xmlImageInfoDoc: Document
+
+export function addMaps(
+  mapAndControl: { map: L.Map; controlLayer: L.Control.Layers, osmLayer: L.Layer },
+  imagesList: MapInfo[]
 ) {
-  // Overlay layers (TMS).
-  const lyr: L.Layer = L.tileLayer(
-    baseURL + "/images/tile/" + id + "/{z}/{x}/{y}",
-    { tms: true, opacity: 1, attribution: "" }
-  );
+  for (let i = 0; i < imagesList.length; i++) {
+    // Overlay layers (TMS).
+    const lyr: L.Layer = L.tileLayer(
+      baseURL + "/images/tile/" + imagesList[i].id + "/{z}/{x}/{y}",
+      { tms: true, opacity: 1, attribution: "" }
+    );
 
-  // Add layer to map.
-  controlLayer.addOverlay(lyr, "Image");
-
-  // Fit to overlay bounds (SW and NE points with (lat, lon))
-  map.fitBounds([
-    [
-      parseFloat(
-        xmlImageInfoDoc.getElementsByTagName("BoundingBox")[0].attributes[1]
-          .nodeValue as string
-      ), // miny
-      parseFloat(
-        xmlImageInfoDoc.getElementsByTagName("BoundingBox")[0].attributes[2]
-          .nodeValue as string
-      ), // maxx
-    ],
-    [
-      parseFloat(
-        xmlImageInfoDoc.getElementsByTagName("BoundingBox")[0].attributes[3]
-          .nodeValue as string
-      ), // maxy
-      parseFloat(
-        xmlImageInfoDoc.getElementsByTagName("BoundingBox")[0].attributes[0]
-          .nodeValue as string
-      ), // minx
-    ],
-  ]);
+    // Add layer to map.
+    mapAndControl.controlLayer.addOverlay(lyr, "Image");
+    mapAndControl.map.addLayer(lyr);
+  }
 }
+
 
 export function addObjects(
-  map: L.Map,
-  controlLayer: L.Control.Layers,
+  mapAndControl: { map: L.Map; controlLayer: L.Control.Layers, osmLayer: L.Layer },
   objectsList: ObjectsMapData[]
 ) {
   for (let i = 0; i < objectsList.length; i++) {
     // Object Polygon Layer.
     const objectPolygon: Polygon = L.polygon(
-      objectsList[i].polygons as LatLngExpression[][],
+      objectsList[i].polygons as LatLngExpression[],
       { color: objectsList[i].color, fillOpacity: 0.4 }
     );
     const objectPolygonLayer: L.LayerGroup = L.layerGroup([objectPolygon]);
 
     // Add layer to map.
-    controlLayer.addOverlay(
+    mapAndControl.controlLayer.addOverlay(
       objectPolygonLayer,
       "<span style='color: " +
         objectsList[i].color +
@@ -116,17 +94,60 @@ export function addObjects(
         objectsList[i].name +
         " </span>"
     );
-
-    // Fit to overlay bounds (SW and NE points with (lat, lon))
-    map.fitBounds([
-      [
-        objectsList[i].polygons[0][0][0], // miny
-        objectsList[i].polygons[0][0][1], // maxx
-      ],
-      [
-        objectsList[i].polygons[0][0][0], // maxy
-        objectsList[i].polygons[0][0][1], // minx
-      ],
-    ]);
+    mapAndControl.map.addLayer(objectPolygonLayer);
   }
+}
+
+
+export async function updateViewMapsAnsObjects(
+  mapAndControl: { map: L.Map; controlLayer: L.Control.Layers, osmLayer: L.Layer },
+  imagesList: MapInfo[] | void,
+  objectsList: ObjectsMapData[] | void,
+  oldPos: {center: L.LatLng, zoom: number, layersDeleted: boolean}
+) {
+  let newCenterCoords = mapAndControl.map.getBounds().getCenter();
+  let newZoom = mapAndControl.map.getZoom();
+
+  if (oldPos.layersDeleted || (oldPos.zoom > newZoom) ||
+      ((Math.abs(oldPos.center["lng"] - newCenterCoords["lng"]) >= getMapSide(mapAndControl.map)) ||
+      (Math.abs(oldPos.center["lat"] - newCenterCoords["lat"]) >= getMapSide(mapAndControl.map)))) {
+        
+    oldPos.center = newCenterCoords;
+    oldPos.zoom = newZoom;
+    
+    // Очищаем старые карты и объекты.
+    oldPos.layersDeleted = true;
+    mapAndControl.map.eachLayer(function (layer) {
+      if (layer !== mapAndControl.osmLayer) {
+        mapAndControl.map.removeLayer(layer);
+        mapAndControl.controlLayer.removeLayer(layer);
+      }
+    });
+    // Запрашиваем новые объекты и карты в пределах видимости.
+    imagesList = await getMaps(
+      mapAndControl.map.getBounds().getCenter()["lat"],
+      mapAndControl.map.getBounds().getCenter()["lng"], 
+      getMapSide(mapAndControl.map)
+    );
+    objectsList = await getObjects(
+      mapAndControl.map.getBounds().getCenter()["lat"],
+      mapAndControl.map.getBounds().getCenter()["lng"], 
+      getMapSide(mapAndControl.map)
+    );
+    // Добавляем объекты и карты в пределах видимости.
+    if (objectsList) {
+      addObjects(mapAndControl, objectsList);
+      oldPos.layersDeleted = false;
+    }
+    if (imagesList) {
+      addMaps(mapAndControl, imagesList);
+      oldPos.layersDeleted = false;
+    }
+  }
+}
+
+
+export function getMapSide(map: L.Map) {
+  let mapSide = Math.abs(map.getBounds().getCenter()["lng"] - map.getBounds().getEast());
+  return mapSide > 2.5 ? mapSide : 2.5;
 }
