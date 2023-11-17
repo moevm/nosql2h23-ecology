@@ -15,7 +15,7 @@ export const routePaths = {
   [routeNames.Queue]: "/queue",
   [routeNames.ObjectsList]: "/objects",
   [routeNames.Upload]: "/upload",
-  [routeNames.Map]: "/map/:id?/:name?/:objectIndex?",
+  [routeNames.Map]: "/map/:y?/:x?",
   [routeNames.Object]: "/object/:id/:name/:objectIndex",
   [routeNames.Home]: "/home",
 };
@@ -46,9 +46,8 @@ export const routes: RouteRecordRaw[] = [
     path: routePaths[routeNames.Map],
     component: () => import("@/views/MapView.vue"),
     props: (route) => ({
-      id: route.params.id,
-      name: route.params.name,
-      objectIndex: route.params.objectIndex,
+      y: route.params.y,
+      x: route.params.x,
     }),
   },
   {
