@@ -61,6 +61,6 @@ class ObjectDeforestation(ObjectBase):
 
         deforestation_object = ObjectDeforestation(img_id, image_bytes)
         ObjectBase.process_object(deforestation_object)
-        deforestation_object.filter_polygons_by_area(10)
+        deforestation_object.filter_polygons_by_area(deforestation_object.max_area / 4)
         deforestation_object.after_end_of_process()
         return "Processing completed"

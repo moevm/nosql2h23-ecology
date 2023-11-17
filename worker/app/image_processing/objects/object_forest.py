@@ -56,6 +56,6 @@ class ObjectForest(ObjectBase):
 
         forest_object = ObjectForest(img_id, image_bytes)
         ObjectBase.process_object(forest_object)
-        forest_object.filter_polygons_by_area(10)
+        forest_object.filter_polygons_by_area(forest_object.max_area / 4)
         forest_object.after_end_of_process()
         return "Processing completed"
