@@ -1,14 +1,16 @@
 import multiprocessing
 import os
 from bson.objectid import ObjectId
+
 from app import app
 from app.image_processing.geotiff_slicer.slice2tiles import sliceToTiles
+from app.image_processing.utility import parse_xml_slice
 from celery.utils.log import get_task_logger
 from app.db import local
 from app import config
 
-logger = get_task_logger(__name__)
 
+logger = get_task_logger(__name__)
 
 @app.task(name='slice', queue="slice")
 def slice(img_id: str):
@@ -61,11 +63,10 @@ def slice(img_id: str):
                     )
 
     # Добавляем данные для отображения изображения.
-    with open(f'{img_id}/tilemapresource.xml', "r") as f:
-        xml_content = f.read()
-        db.images.update_one({"_id": image_info["_id"]}, {"$set": {"tile_map_resource": xml_content}})
+    location = parse_xml_slice(f'{img_id}/tilemapresource.xml')
+    db.images.update_one({"_id": image_info["_id"]}, {"$set": {"location": location}})
 
-    # Удаляем временную папку с слайсами.
+    # Удаляем временную папку со слайсами.
     for root, dirs, files in os.walk(img_id, topdown=False):
         for name in files:
             os.remove(os.path.join(root, name))
