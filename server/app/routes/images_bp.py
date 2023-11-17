@@ -28,10 +28,33 @@ def get_images_list():
             "name": img["name"],
             'uploadDate': img["upload_date"],
             'size': maps_fs.find_one({'_id': img["fs_id"]}).length,
+            "location": img["location"],
             "ready": img["ready"],
             "sliced": img["sliced"]
         })
 
+    return images
+
+
+@images_bp.route('/near/<string:y>/<string:x>/<string:r>', methods=['GET'])
+def images_near(y, x, r):
+    x, y, r = float(x), float(y), float(r)
+    # TO DO: после рефакторинга бд должно находится НОРМАЛЬНО, а не в цикле :(
+    images = []
+    for img in db.images.find({}):
+        # Координаты в [y, x], так как leaflet работает в [lat, long].
+        if (img["sliced"]):
+            y_point_img, x_point_img = img["location"]["coordinates"][0]
+            if (x_point_img - x)**2 + (y_point_img - y)**2 <= r**2:
+                images.append({
+                    "id": str(img["_id"]),
+                    "name": img["name"],
+                    'uploadDate': img["upload_date"],
+                    'size': maps_fs.find_one({'_id': img["fs_id"]}).length,
+                    "location": img["location"],
+                    "ready": img["ready"],
+                    "sliced": img["sliced"]
+                })
     return images
 
 
@@ -50,7 +73,7 @@ def add_image():
     file_id = maps_fs.put(image, filename=image.filename, chunk_size=256 * 1024)
     img_name = request.form.get('name')
     item = {
-        "tile_map_resource": None,
+        "location": {"type": "Polygon", "coordinates": []},
         "fs_id": file_id,
         "objects": [],
         "upload_date": str(arrow.now().to('UTC')),
@@ -94,13 +117,6 @@ def get_tile(img_id, z, x, y):
         return send_file(io.BytesIO(tile.read()), mimetype='image/png')
     else:
         return 'OK'
-
-
-@images_bp.route('/<string:img_id>', methods=['GET'])
-def get_image(img_id):
-    image_info = db.images.find_one(ObjectId(img_id))
-    image_file = tiles_fs.get(image_info["fs_id"])
-    return send_file(io.BytesIO(image_file), mimetype='image/tiff')
 
 
 @images_bp.route('/objects/<string:img_id>', methods=['GET'])
