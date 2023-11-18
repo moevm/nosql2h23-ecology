@@ -8,7 +8,7 @@ api = Namespace("users", description="Операции с пользовател
 db = LocalProxy(get_db)
 
 
-@api.route('')
+@api.route('/')
 class UserList(Resource):
     def post(self):
         return "Create"
