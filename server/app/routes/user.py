@@ -7,17 +7,15 @@ api = Namespace("users", description="Операции с пользовател
 
 db = LocalProxy(get_db)
 
-user_post_parser = api.parser()
-user_post_parser.add_argument(
+# Тело для добавления пользователя
+user_post_parser = api.parser(
+).add_argument(
     "login", type=str, required=True
-)
-user_post_parser.add_argument(
+).add_argument(
     "password", type=str, required=True
-)
-user_post_parser.add_argument(
+).add_argument(
     "name", type=str, required=True
-)
-user_post_parser.add_argument(
+).add_argument(
     "role", type=str, required=True
 )
 
