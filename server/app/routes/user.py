@@ -35,7 +35,7 @@ class UserList(Resource):
 
 
 @api.route('/user/<int:id>')
-class User(Resource):
+class UserResource(Resource):
     def get(self, id):
         return f"User: {id}"
 
