@@ -7,11 +7,33 @@ api = Namespace("users", description="Операции с пользовател
 
 db = LocalProxy(get_db)
 
+user_post_parser = api.parser()
+user_post_parser.add_argument(
+    "login", type=str, required=True
+)
+user_post_parser.add_argument(
+    "password", type=str, required=True
+)
+user_post_parser.add_argument(
+    "name", type=str, required=True
+)
+user_post_parser.add_argument(
+    "role", type=str, required=True
+)
+
 
 @api.route('/')
 class UserList(Resource):
+    @api.doc(parser=user_post_parser)
     def post(self):
-        return "Create"
+        args = user_post_parser.parse_args()
+        if db.users.find_one({"login": args.login}):
+            return f"User with login {args.login} already exists", 400
+        result = db.users.insert_one(args)
+        return str(result.inserted_id)
+
+    def get(self):
+        return 'Get Self'
 
 
 @api.route('/user/<int:id>')
