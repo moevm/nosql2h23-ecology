@@ -8,6 +8,10 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 app.config.from_pyfile('config.py')
 
+from .auth.login_manager import login_manager
+
+login_manager.init_app(app)
+
 from .routes import api
 
 api.init_app(app)
