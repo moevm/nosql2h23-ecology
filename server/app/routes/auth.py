@@ -2,6 +2,7 @@ from flask_login import login_user, login_required, current_user, logout_user
 from flask_restx import Namespace, Resource
 from werkzeug.local import LocalProxy
 
+from flask import current_app as app
 from app.auth.User import User
 from app.db import get_db
 
@@ -34,9 +35,9 @@ class Login(Resource):
 
     @login_required
     def get(self):
-        print(current_user)
         return f'Logged in'
 
+    @login_required
     def delete(self):
         logout_user()
         return 'Logged out'
@@ -44,5 +45,15 @@ class Login(Resource):
 
 @api.route('/login/dev')
 class Login(Resource):
-    def post(self):
-        return "Admin Login"
+    def get(self):
+        admin = db.users.find_one({"login": app.config.get('INIT_ADMIN_LOGIN')})
+        if not admin:
+            result = db.users.insert_one({
+                'login': app.config.get('INIT_ADMIN_LOGIN'),
+                'password': app.config.get('INIT_ADMIN_PASSWORD'),
+                'name': 'root',
+                'role': 'admin'
+            })
+            admin = db.users.find_one(result.inserted_id)
+        login_user(User(admin), remember=True)
+        return "Logged in as root"
