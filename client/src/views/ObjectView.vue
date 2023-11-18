@@ -1,6 +1,6 @@
 <template>
   <Suspense>
-    <ReportComponent :id="id" />
+    <ObjectComponent :id="id" :name="name" :object-index="objectIndex" />
     <template #fallback>
       <LoadingSpinner />
     </template>
@@ -8,9 +8,9 @@
 </template>
 
 <script setup lang="ts">
-import ReportComponent from "@/components/routes/report/ReportComponent.vue";
+import ObjectComponent from "@/components/routes/object/ObjectComponent.vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
-defineProps<{ id: string }>();
+defineProps<{ id: string; name: string; objectIndex: string }>();
 </script>
 
 <style scoped lang="scss"></style>

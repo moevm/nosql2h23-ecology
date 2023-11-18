@@ -20,18 +20,19 @@ def close_db(error=None):
         db.close()
 
 
-def get_map_fs():
-    fs = getattr(g, "map_fs", None)
+def get_maps():
+    fs = getattr(g, "maps", None)
     if fs is None:
-        fs = g.map_fs = GridFS(get_db(), 'map_fs')
+        fs = g.maps = GridFS(get_db(), 'maps')
     return fs
 
 
-def get_tile_fs():
-    fs = getattr(g, "tile_fs", None)
+def get_tiles():
+    fs = getattr(g, "tiles", None)
     if fs is None:
-        fs = g.tile_fs = GridFS(get_db(), 'tile_fs')
+        fs = g.tiles = GridFS(get_db(), 'tiles')
     return fs
+
 
 
 def get_redis():

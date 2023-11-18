@@ -1,22 +1,16 @@
 <template>
   <div class="container-lg">
     <h2 class="text-center mt-2 text-primary">
-      Просмотр аномалии {{ name }} номер {{ anomalyIndex }} на карте №{{ id }}
+      Просмотр объекты {{ name }} номер {{ objectIndex }} на карте №{{ id }}
     </h2>
     <div class="row justify-content-end">
-      <router-link
-        class="col-auto"
-        :to="{ name: routeNames.Report, params: { id: anomalyData.id } }"
-      >
-        <button class="btn btn-primary">Открыть отчёт</button>
-      </router-link>
     </div>
 
     <AgGridVue
       class="ag-theme-alpine mt-3"
       :column-defs="columnDefs"
       :grid-options="options"
-      :row-data="[anomalyData]"
+      :row-data="[objectData]"
       style="height: 93px"
       @grid-ready="fitActionsColumn"
     />
@@ -30,7 +24,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { ColDef, GridOptions } from "ag-grid-community";
-import { AnomalyData } from "@/types/anomalies";
+import { ObjectData } from "@/types/objects";
 import { dateFormatter } from "@/ag-grid/formatters";
 import {
   fitActionsColumn,
@@ -38,16 +32,16 @@ import {
   getDefaultGridOptions,
 } from "@/ag-grid/factory";
 import { routeNames } from "@/router";
-import { getAnomalyData } from "@/components/routes/anomaly/api";
+import { getObjectData } from "@/components/routes/object/api";
 import { AgGridVue } from "ag-grid-vue3";
 import MapDisplay from "@/components/common/map/MapDisplay.vue";
 
-const props = defineProps<{ id: string; name: string; anomalyIndex: string }>();
+const props = defineProps<{ id: string; name: string; objectIndex: string }>();
 const mapDisplay = ref<InstanceType<typeof MapDisplay>>();
 
-const columnDefs: ColDef<AnomalyData>[] = [
+const columnDefs: ColDef<ObjectData>[] = [
   { headerName: "Название", field: "name", flex: 4, minWidth: 180 },
-  { headerName: "Индекс", field: "anomalyIndex", flex: 4, minWidth: 180 },
+  { headerName: "Индекс", field: "objectIndex", flex: 4, minWidth: 180 },
   { headerName: "Площадь", field: "area", flex: 4, minWidth: 180 },
   {
     headerName: "Дата загрузки",
@@ -70,25 +64,25 @@ const columnDefs: ColDef<AnomalyData>[] = [
         icon: "bi bi-eye",
         button: "btn-info",
         onClicked: (action, data) => {
-          mapDisplay.value?.flyToCoordinates?.(anomalyData.coordinates);
+          mapDisplay.value?.flyToCoordinates?.(objectData.coordinates);
         },
       },
     ]),
   },
 ];
 
-const options: GridOptions<AnomalyData> = {
+const options: GridOptions<ObjectData> = {
   ...getDefaultGridOptions(),
 };
 
 function onMapReady() {
-  mapDisplay.value?.addMarker?.(anomalyData.coordinates);
+  mapDisplay.value?.addMarker?.(objectData.coordinates);
 }
 
-const anomalyData = await getAnomalyData(
+const objectData = await getObjectData(
   props.id,
   props.name,
-  props.anomalyIndex
+  props.objectIndex
 );
 </script>
 

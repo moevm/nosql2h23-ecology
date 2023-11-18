@@ -2,7 +2,7 @@ import axios, { AxiosError } from "axios";
 import L, { LatLngExpression, Polygon } from "leaflet";
 
 import { baseURL } from "@/api";
-import { AnomaliesMapData } from "@/types/anomalies";
+import { ObjectsMapData } from "@/types/objects";
 
 export async function getXMLinfo(id: string): Promise<Document | void> {
   return axios
@@ -18,11 +18,11 @@ export async function getXMLinfo(id: string): Promise<Document | void> {
     });
 }
 
-export async function getAnomalies(
+export async function getObjects(
   id: string
-): Promise<AnomaliesMapData[] | void> {
+): Promise<ObjectsMapData[] | void> {
   return (
-    await axios.get<AnomaliesMapData[]>(baseURL + "/images/anomalies/" + id)
+    await axios.get<ObjectsMapData[]>(baseURL + "/images/objects/" + id)
   ).data;
 }
 
@@ -116,38 +116,38 @@ export function addTileLayerMap(
   );
 }
 
-export function addAnomalies(
+export function addObjects(
   map: L.Map,
   controlLayer: L.Control.Layers,
-  anomaliesList: AnomaliesMapData[]
+  objectsList: ObjectsMapData[]
 ) {
-  for (let i = 0; i < anomaliesList.length; i++) {
-    // Anomaly Polygon Layer.
-    const anomalyPolygon: Polygon = L.polygon(
-      anomaliesList[i].polygons as LatLngExpression[][],
-      { color: anomaliesList[i].color, fillOpacity: 0.4 }
+  for (let i = 0; i < objectsList.length; i++) {
+    // Object Polygon Layer.
+    const objectPolygon: Polygon = L.polygon(
+      objectsList[i].polygons as LatLngExpression[][],
+      { color: objectsList[i].color, fillOpacity: 0.4 }
     );
-    const anomalyPolygonLayer: L.LayerGroup = L.layerGroup([anomalyPolygon]);
+    const objectPolygonLayer: L.LayerGroup = L.layerGroup([objectPolygon]);
 
     // Add layer to map.
     controlLayer.addOverlay(
-      anomalyPolygonLayer,
+      objectPolygonLayer,
       "<span style='color: " +
-        anomaliesList[i].color +
+        objectsList[i].color +
         "'> " +
-        anomaliesList[i].name +
+        objectsList[i].name +
         " </span>"
     );
 
     // Fit to overlay bounds (SW and NE points with (lat, lon))
     map.fitBounds([
       [
-        anomaliesList[i].polygons[0][0][0], // miny
-        anomaliesList[i].polygons[0][0][1], // maxx
+        objectsList[i].polygons[0][0][0], // miny
+        objectsList[i].polygons[0][0][1], // maxx
       ],
       [
-        anomaliesList[i].polygons[0][0][0], // maxy
-        anomaliesList[i].polygons[0][0][1], // minx
+        objectsList[i].polygons[0][0][0], // maxy
+        objectsList[i].polygons[0][0][1], // minx
       ],
     ]);
   }

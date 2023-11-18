@@ -46,7 +46,7 @@ def connect_to_redis(url, port):
 def set_and_get_element_redis(redis):
     # set элемент в виде словаря.
     redis.hset('map:1234', mapping={
-        'anomalies': 300,
+        'objects': 300,
         "size": 12400
     })
 

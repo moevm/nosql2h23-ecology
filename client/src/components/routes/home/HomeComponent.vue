@@ -2,7 +2,7 @@
   <div class="container">
     <h4 class="text-center mt-3">MSE 12 Ecology</h4>
     <h5 class="text-center">
-      Сервис обработки спутниковых карт и поиска аномалий
+      Сервис обработки спутниковых карт и поиска объектов
     </h5>
 
     <div id="accordion" class="accordion mt-2">
@@ -97,19 +97,17 @@
             class="accordion-button collapsed"
             type="button"
             data-bs-toggle="collapse"
-            data-bs-target="#reports"
+            data-bs-target="#objects"
           >
-            Отчёты
+            Объекты
           </button>
         </h2>
-        <div id="reports" class="accordion-collapse collapse">
+        <div id="objects" class="accordion-collapse collapse">
           <div class="accordion-body">
             В разделе
-            <span class="text-primary">Отчёты</span>
-            находятся список отчётов уже обработанных карт, на которых найдены
-            аномалии. Здесь можно открыть карту изображения, к которому
-            относится отчет или перейти в просмотр самого отчёта по аномалиям
-            найденным на изображении.
+            <span class="text-primary">Объекты</span>
+            находятся все найденные области выделяемых объектов на полностью обработанных
+            изображениях. Там же можно открыть на просмотр один отдельный объект.
           </div>
         </div>
       </div>
@@ -120,59 +118,17 @@
             class="accordion-button collapsed"
             type="button"
             data-bs-toggle="collapse"
-            data-bs-target="#reports-view"
+            data-bs-target="#object"
           >
-            Просмотр отчёта
+            Просмотр объекта
           </button>
         </h2>
-        <div id="reports-view" class="accordion-collapse collapse">
+        <div id="object" class="accordion-collapse collapse">
           <div class="accordion-body">
-            В просмотре отчёта отображаются данные по всем найденным на
-            изображении аномалиям. Там же можно открыть на просмотр одну
-            отдельную аномалию или отобразить её на карте.
-          </div>
-        </div>
-      </div>
-
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button
-            class="accordion-button collapsed"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#anomalies"
-          >
-            Аномалии
-          </button>
-        </h2>
-        <div id="anomalies" class="accordion-collapse collapse">
-          <div class="accordion-body">
-            В разделе
-            <span class="text-primary">Аномалии</span>
-            находятся все найденные области аномалий на полностью обработанных
-            изображениях. Там же можно открыть на просмотр одну отдельную
-            аномалию.
-          </div>
-        </div>
-      </div>
-
-      <div class="accordion-item">
-        <h2 class="accordion-header">
-          <button
-            class="accordion-button collapsed"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#anomaly"
-          >
-            Просмотр аномалии
-          </button>
-        </h2>
-        <div id="anomaly" class="accordion-collapse collapse">
-          <div class="accordion-body">
-            В режиме просмотра аномалии можно посмотреть все параметры найденной
-            аномалии, отметить её на карте с помощью клавиши "Показать на
-            карте", а так же открыть отчет изображения, на котором была найдена
-            аномалия.
+            В режиме просмотра объекта можно посмотреть все параметры найденного
+            объекта, отметить его на карте с помощью клавиши "Показать на
+            карте", а так же открыть отчет изображения, на котором был найден
+            объект.
           </div>
         </div>
       </div>

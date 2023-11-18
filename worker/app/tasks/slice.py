@@ -16,15 +16,15 @@ def slice(img_id: str):
     <image_name>_<z>_<x>_<y>.png
     """
     db = local.db
-    map_fs = local.map_fs
-    tile_fs = local.tile_fs
+    maps_fs = local.maps_fs
+    tiles_fs = local.tiles_fs
     redis = local.redis
 
     # Получаем запись из бд с информацией по изображению.
     image_info = db.images.find_one(ObjectId(img_id))
 
     # Получаем саму картинку из GridFS.
-    image_bytes = map_fs.get(image_info['fs_id']).read()
+    image_bytes = maps_fs.get(image_info['fs_id']).read()
 
     slicers = len(redis.keys('slice_queue:*'))
 
@@ -35,9 +35,9 @@ def slice(img_id: str):
     )
 
     # Удаляем фрагменты, если они уже были в GridFS.
-    cursor = tile_fs.find({"image_id": img_id})
+    cursor = tiles_fs.find({"image_id": img_id})
     for document in cursor:
-        tile_fs.delete(document["_id"])
+        tiles_fs.delete(document["_id"])
 
     # Добавляем все фрагменты в GridFS.
     for root, _, files in os.walk(img_id):
@@ -48,7 +48,7 @@ def slice(img_id: str):
             if len(path) >= 2:
                 with open(root + "/" + file, "rb") as f:
                     file_content = f.read()
-                    tile_fs.put(
+                    tiles_fs.put(
                         file_content,
                         image_id=ObjectId(img_id),
                         z=int(path[1]),

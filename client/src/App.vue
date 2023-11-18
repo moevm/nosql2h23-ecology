@@ -49,15 +49,13 @@ import ToasterComponent from "@/components/common/ToasterComponent.vue";
 const routes = [
   routeNames.MapsList,
   routeNames.Queue,
-  routeNames.ReportsList,
-  routeNames.AnomaliesList,
+  routeNames.ObjectsList,
   routeNames.Upload,
 ];
 const routesTranslation = {
   [routeNames.MapsList]: "Карты",
   [routeNames.Queue]: "Очередь",
-  [routeNames.ReportsList]: "Отчёты",
-  [routeNames.AnomaliesList]: "Аномалии",
+  [routeNames.ObjectsList]: "Объекты",
   [routeNames.Upload]: "Загрузить",
 };
 </script>

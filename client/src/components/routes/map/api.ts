@@ -1,8 +1,8 @@
 import axios from "axios";
 
 import { baseURL } from "@/api";
-import { AnomalyData } from "@/types/anomalies";
+import { ObjectData } from "@/types/objects";
 
-export async function getMapData(id: string): Promise<AnomalyData[]> {
-  return (await axios.get<AnomalyData[]>(baseURL + "/anomalies/" + id)).data;
+export async function getMapData(id: string): Promise<ObjectData[]> {
+  return (await axios.get<ObjectData[]>(baseURL + "/objects/" + id)).data;
 }

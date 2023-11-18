@@ -3,24 +3,20 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 export const routeNames = {
   MapsList: "Maps",
   Queue: "Queue",
-  ReportsList: "Reports",
-  AnomaliesList: "Anomalies",
+  ObjectsList: "Objects",
   Upload: "Upload",
   Map: "Map",
-  Report: "Report",
-  Anomaly: "Anomaly",
+  Object: "Object",
   Home: "Home",
 };
 
 export const routePaths = {
   [routeNames.MapsList]: "/",
   [routeNames.Queue]: "/queue",
-  [routeNames.ReportsList]: "/reports",
-  [routeNames.AnomaliesList]: "/anomalies",
+  [routeNames.ObjectsList]: "/objects",
   [routeNames.Upload]: "/upload",
-  [routeNames.Map]: "/map/:id/:name?/:anomalyIndex?",
-  [routeNames.Report]: "/report/:id",
-  [routeNames.Anomaly]: "/anomaly/:id/:name/:anomalyIndex",
+  [routeNames.Map]: "/map/:id/:name?/:objectIndex?",
+  [routeNames.Object]: "/object/:id/:name/:objectIndex",
   [routeNames.Home]: "/home",
 };
 
@@ -36,14 +32,9 @@ export const routes: RouteRecordRaw[] = [
     component: () => import("@/views/QueueView.vue"),
   },
   {
-    name: routeNames.ReportsList,
-    path: routePaths[routeNames.ReportsList],
-    component: () => import("@/views/ReportsListView.vue"),
-  },
-  {
-    name: routeNames.AnomaliesList,
-    path: routePaths[routeNames.AnomaliesList],
-    component: () => import("@/views/AnomaliesListView.vue"),
+    name: routeNames.ObjectsList,
+    path: routePaths[routeNames.ObjectsList],
+    component: () => import("@/views/ObjectsListView.vue"),
   },
   {
     name: routeNames.Upload,
@@ -57,23 +48,17 @@ export const routes: RouteRecordRaw[] = [
     props: (route) => ({
       id: route.params.id,
       name: route.params.name,
-      anomalyIndex: route.params.anomalyIndex,
+      objectIndex: route.params.objectIndex,
     }),
   },
   {
-    name: routeNames.Report,
-    path: routePaths[routeNames.Report],
-    component: () => import("@/views/ReportView.vue"),
-    props: (route) => ({ id: route.params.id }),
-  },
-  {
-    name: routeNames.Anomaly,
-    path: routePaths[routeNames.Anomaly],
-    component: () => import("@/views/AnomalyView.vue"),
+    name: routeNames.Object,
+    path: routePaths[routeNames.Object],
+    component: () => import("@/views/ObjectView.vue"),
     props: (route) => ({
       id: route.params.id,
       name: route.params.name,
-      anomalyIndex: route.params.anomalyIndex,
+      objectIndex: route.params.objectIndex,
     }),
   },
   {
