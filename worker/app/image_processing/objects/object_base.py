@@ -16,6 +16,7 @@ class ObjectBase:
         self.image_bytes = image_bytes
         self.polygons = []
         self.area = []
+        self.max_area = 0
         
         self.name = "Base Object"
         self.color = "black"
@@ -84,6 +85,8 @@ class ObjectBase:
         for polygon in contours:
             # Находим площадь в пикселях и умножаем на разрешение каждого пикселя.
             area = cv2.contourArea(polygon) * sptial_res[0] * sptial_res[1]
+            if area > self.max_area:
+                self.max_area = area
             self.area.append(area)
             self.update(step_progress)
 

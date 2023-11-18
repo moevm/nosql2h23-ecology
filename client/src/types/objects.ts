@@ -20,5 +20,5 @@ export interface ObjectData {
 export interface ObjectsMapData {
   name: string;
   color: string;
-  polygons: number[][][];
+  polygons: number[][];
 }

@@ -47,12 +47,14 @@ import { routeNames } from "@/router";
 import ToasterComponent from "@/components/common/ToasterComponent.vue";
 
 const routes = [
+  routeNames.Map,
   routeNames.MapsList,
   routeNames.Queue,
   routeNames.ObjectsList,
   routeNames.Upload,
 ];
 const routesTranslation = {
+  [routeNames.Map]: "Глобальная карта",
   [routeNames.MapsList]: "Карты",
   [routeNames.Queue]: "Очередь",
   [routeNames.ObjectsList]: "Объекты",

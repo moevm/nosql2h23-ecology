@@ -1,7 +1,7 @@
 <template>
   <div class="container-lg">
-    <h2 class="text-center mt-2 text-primary">Просмотр карты №{{ id }}</h2>
-    <div v-if="mapData && mapData.length" class="row justify-content-between">
+    <!-- TO DO: Нужно будет вернуть, но с данными по оббъектам не одной карты, а выделенным объектам. -->
+    <!-- <div v-if="mapData && mapData.length" class="row justify-content-between">
       <h3 class="col">Объекты</h3>
     </div>
     <AgGridVue
@@ -11,9 +11,9 @@
       :column-defs="columnDefs"
       :grid-options="options"
       @grid-ready="fitActionsColumn"
-    />
+    /> -->
     <div class="d-flex justify-content-center mt-3">
-      <MapDisplay :id="id" ref="mapDisplay" @map-ready="onMapReady" />
+      <MapDisplay :x="x" :y="y" ref="mapDisplay"/>
     </div>
   </div>
 </template>
@@ -35,11 +35,11 @@ import L from "leaflet";
 
 import MapDisplay from "@/components/common/map/MapDisplay.vue";
 
+
 const router = useRouter();
 const props = defineProps<{
-  id: string;
-  name?: string;
-  objectIndex?: string;
+  x?: number;
+  y?: number;
 }>();
 const mapDisplay = ref<InstanceType<typeof MapDisplay>>();
 let lastMarker: L.Marker | undefined = undefined;
@@ -87,26 +87,29 @@ const options: GridOptions<ObjectData> = {
   domLayout: "autoHeight",
 };
 
-function onMapReady() {
-  if (props.name && props.objectIndex) {
-    let coordinates: [number, number] = [0, 0];
-    for (let i = 0; i < mapData.length; i++) {
-      if (
-        mapData[i].name === props.name &&
-        mapData[i].objectIndex == props.objectIndex
-      ) {
-        coordinates = mapData[i].coordinates;
-        break;
-      }
-    }
-    if (lastMarker) {
-      mapDisplay.value?.removeMarker?.(lastMarker);
-    }
-    lastMarker = mapDisplay.value?.addMarker?.(coordinates);
-  }
-}
+// function onMapReady() {
+//   if (props.name && props.objectIndex) {
+//     let coordinates: [number, number] = [0, 0];
+//     for (let i = 0; i < mapData.length; i++) {
+//       if (
+//         mapData[i].name === props.name &&
+//         mapData[i].objectIndex == props.objectIndex
+//       ) {
+//         coordinates = mapData[i].coordinates;
+//         break;
+//       }
+//     }
+//     if (lastMarker) {
+//       mapDisplay.value?.removeMarker?.(lastMarker);
+//     }
+//     lastMarker = mapDisplay.value?.addMarker?.(coordinates);
+//   }
+// }
 
-const mapData = await getMapData(props.id);
+// let mapData: ObjectData[];
+// if (props.id) {
+//   mapData = await getMapData(props.id);
+// }
 </script>
 
 <style scoped lang="scss"></style>
