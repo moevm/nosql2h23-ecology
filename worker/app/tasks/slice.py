@@ -21,7 +21,7 @@ def slice(map_id: str):
     redis = local.redis
 
     # Получаем запись из бд с информацией по изображению.
-    map_file = maps_fs.files.find_one(ObjectId(map_id))
+    map_file = db.maps.find_one(ObjectId(map_id))
 
     # Получаем саму картинку из GridFS.
     #image_bytes = maps_fs.get(map_file['fs_id']).read()
@@ -30,7 +30,7 @@ def slice(map_id: str):
 
     # Нарезаем на фрагменты.
     sliceToTiles(
-        map_id, map_file.read(), f'./{map_id}',
+        map_id, maps_fs.files.find_one(ObjectId(map_id)).read(), f'./{map_id}',
         optionsSliceToTiles={"nb_processes": max(1, multiprocessing.cpu_count() // (1 + slicers))}
     )
 
@@ -61,7 +61,7 @@ def slice(map_id: str):
     # Добавляем данные для отображения изображения.
     with open(f'{map_id}/tilemapresource.xml', "r") as f:
         xml_content = f.read()
-        maps_fs.files.update_one({"_id": map_file["_id"]}, {"$set": {"tile_map_resource": xml_content}})
+        db.maps.update_one({"_id": map_file["_id"]}, {"$set": {"tile_map_resource": xml_content}})
 
     # Удаляем временную папку с слайсами.
     for root, dirs, files in os.walk(map_id, topdown=False):
@@ -72,6 +72,6 @@ def slice(map_id: str):
     os.rmdir(map_id)
 
     redis.delete(f'slice_queue:{map_id}')
-    maps_fs.files.update_one({"_id": map_file["_id"]}, {"$set": {"sliced": True}})
+    db.maps.update_one({"_id": map_file["_id"]}, {"$set": {"sliced": True}})
 
     return "Done"

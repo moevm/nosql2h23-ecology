@@ -126,7 +126,7 @@ class ObjectBase:
         db = local.db
         redis = local.redis
         maps_fs = local.maps_fs
-        image_info = maps_fs.files.find_one(ObjectId(self.img_id))
+        image_info = db.maps.files.find_one(ObjectId(self.img_id)).find_one()
         queue_item = f'queue:{self.img_id}'
         
         if (len(self.polygons) > 0):
@@ -146,7 +146,7 @@ class ObjectBase:
         redis.hset(queue_item, 'processing_functions', int(redis.hget(queue_item, 'processing_functions')) - 1)
         if int(redis.hget(queue_item, 'processing_functions')) == 0:
             redis.delete(queue_item)
-            maps_fs.files.update_one({"_id": image_info['_id']}, {"$set": {"ready": True}})
+            db.maps.files.update_one({"_id": image_info['_id']}, {"$set": {"ready": True}})
 
     def get_object_by_index(self, index):
         '''

@@ -11,7 +11,7 @@ def process_image(map_id: str):
     db = local.db
     redis = local.redis
     maps_fs = local.maps_fs
-    map_file = maps_fs.files.find_one(ObjectId(map_id))
+    map_file = db.maps.find_one(ObjectId(map_id))
     
     # 
     ## Список объектов для поиска
