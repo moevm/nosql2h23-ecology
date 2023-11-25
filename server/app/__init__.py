@@ -16,7 +16,7 @@ from .routes import api
 
 api.init_app(app)
 
-CORS(app)
+CORS(app, supports_credentials=True)
 
 from .websocket.queue import send_queue
 
