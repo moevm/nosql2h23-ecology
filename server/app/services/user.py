@@ -20,4 +20,4 @@ def update_user(id: str, data):
 
 
 def delete_user(id: str):
-    db.users.delete_one(ObjectId(id))
+    db.users.delete_one({"_id": ObjectId(id)})

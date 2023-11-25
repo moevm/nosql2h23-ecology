@@ -4,7 +4,7 @@ from werkzeug.local import LocalProxy
 
 from app.auth.authorization import role_require
 from app.db import get_db
-from app.services.user import get_user_by_id, find_user, update_user
+from app.services.user import get_user_by_id, find_user, update_user, delete_user
 from app.utils import parse_json
 
 api = Namespace("users", description="Операции с пользователями")
@@ -64,7 +64,8 @@ class UserResource(Resource):
     @login_required
     @role_require('admin')
     def delete(self, id):
-        return f"Delete: {id}"
+        delete_user(id)
+        return "Deleted"
 
     @login_required
     @role_require('admin')
