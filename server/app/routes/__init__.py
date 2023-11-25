@@ -1,7 +1,18 @@
-from flask import Blueprint
-from .images_bp import images_bp
-from .objects_bp import objects_bp
+from flask_restx import Api
 
-api_bp = Blueprint('api', __name__)
-api_bp.register_blueprint(images_bp, url_prefix="/images")
-api_bp.register_blueprint(objects_bp, url_prefix="/objects")
+from .images import api as images_api
+from .user import api as user_api
+from .auth import api as auth_api
+from .objects import api as objects_api
+
+api = Api(
+    title="Ecology API",
+    version="1.0",
+    prefix='/api',
+    doc='/api/docs'
+)
+
+api.add_namespace(user_api)
+api.add_namespace(auth_api)
+api.add_namespace(images_api)
+api.add_namespace(objects_api)
