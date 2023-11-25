@@ -2,7 +2,7 @@ import axios, { AxiosError } from "axios";
 import L, { LatLngExpression, Polygon } from "leaflet";
 
 import { baseURL } from "@/api";
-import { ObjectsMapData } from "@/types/objects";
+import { ObjectData } from "@/types/objects";
 
 export async function getXMLinfo(id: string): Promise<Document | void> {
   return axios
@@ -18,11 +18,9 @@ export async function getXMLinfo(id: string): Promise<Document | void> {
     });
 }
 
-export async function getObjects(
-  id: string
-): Promise<ObjectsMapData[] | void> {
+export async function getObjects(): Promise<ObjectData[] | void> {
   return (
-    await axios.get<ObjectsMapData[]>(baseURL + "/objects/" + id)
+    await axios.get<ObjectData[]>(baseURL + "/objects")
   ).data;
 }
 
@@ -119,11 +117,11 @@ export function addTileLayerMap(
 export function addObjects(
   map: L.Map,
   controlLayer: L.Control.Layers,
-  objectsList: ObjectsMapData[]
+  objectsList: ObjectData[]
 ) {
   for (let i = 0; i < objectsList.length; i++) {
     // Object Polygon Layer.
-    const objectPolygon: Polygon = L.polygon(
+    /*const objectPolygon: Polygon = L.polygon(
       objectsList[i].polygons as LatLngExpression[][],
       { color: objectsList[i].color, fillOpacity: 0.4 }
     );
@@ -149,6 +147,6 @@ export function addObjects(
         objectsList[i].polygons[0][0][0], // maxy
         objectsList[i].polygons[0][0][1], // minx
       ],
-    ]);
+    ]);*/
   }
 }

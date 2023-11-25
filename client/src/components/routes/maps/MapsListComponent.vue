@@ -55,8 +55,8 @@ const columnDefs: ColDef<MapInfo>[] = [
   { headerName: "Id", field: "id", flex: 2, minWidth: 80 },
   { headerName: "Имя", field: "name", flex: 3, minWidth: 180 },
   {
-    headerName: "Дата загрузки",
-    field: "date",
+    headerName: "Дата последнего изменения",
+    field: "update",
     flex: 5,
     minWidth: 180,
     valueFormatter: dateFormatter,

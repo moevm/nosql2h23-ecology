@@ -47,7 +47,6 @@ let lastMarker: L.Marker | undefined = undefined;
 const columnDefs: ColDef<ObjectData>[] = [
   { headerName: "Id", field: "id", flex: 2, minWidth: 120 },
   { headerName: "Название", field: "name", flex: 4, minWidth: 180 },
-  { headerName: "Площадь", field: "area", flex: 4, minWidth: 180 },
   {
     ...getActionsColDef([
       {
@@ -58,9 +57,7 @@ const columnDefs: ColDef<ObjectData>[] = [
           router.push({
             name: routeNames.Object,
             params: {
-              id: data.id,
-              name: data.name,
-              objectIndex: data.objectIndex,
+              id: data.id
             },
           }),
       },
@@ -72,8 +69,8 @@ const columnDefs: ColDef<ObjectData>[] = [
           if (lastMarker) {
             mapDisplay.value?.removeMarker?.(lastMarker);
           }
-          lastMarker = mapDisplay.value?.addMarker?.(data.coordinates);
-          mapDisplay.value?.flyToCoordinates?.(data.coordinates);
+          lastMarker = mapDisplay.value?.addMarker?.(data.location);
+          mapDisplay.value?.flyToCoordinates?.(data.location);
         },
       },
     ]),
@@ -88,14 +85,14 @@ const options: GridOptions<ObjectData> = {
 };
 
 function onMapReady() {
-  if (props.name && props.objectIndex) {
+  if (props.name && props.id) {
     let coordinates: [number, number] = [0, 0];
     for (let i = 0; i < mapData.length; i++) {
       if (
         mapData[i].name === props.name &&
-        mapData[i].objectIndex == props.objectIndex
+        mapData[i].id == props.id
       ) {
-        coordinates = mapData[i].coordinates;
+        coordinates = mapData[i].location;
         break;
       }
     }

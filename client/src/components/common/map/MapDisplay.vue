@@ -22,7 +22,7 @@ defineExpose({ addMarker, removeMarker, flyToCoordinates });
 
 const props = defineProps<{ id: string }>();
 const xmlImageInfoDoc = await getXMLinfo(props.id);
-let objectsList = await getObjects(props.id);
+let objectsList = await getObjects();
 
 const emit = defineEmits<{ (e: "map-ready"): void }>();
 
