@@ -14,4 +14,8 @@ with app.app_context():
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User(db.users.find_one(ObjectId(user_id)))
+    user = db.users.find_one(ObjectId(user_id))
+    if user:
+        return User(user)
+    else:
+        return None
