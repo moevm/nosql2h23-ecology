@@ -39,20 +39,12 @@ import MapDisplay from "@/components/common/map/MapDisplay.vue";
 const props = defineProps<{ id: string; name: string; objectIndex: string }>();
 const mapDisplay = ref<InstanceType<typeof MapDisplay>>();
 
-const columnDefs: ColDef<ObjectData>[] = [
+const columnDefs: ColDef<Object>[] = [
   { headerName: "Название", field: "name", flex: 4, minWidth: 180 },
   { headerName: "Индекс", field: "objectIndex", flex: 4, minWidth: 180 },
-  { headerName: "Площадь", field: "area", flex: 4, minWidth: 180 },
   {
-    headerName: "Дата загрузки",
-    field: "uploadDate",
-    flex: 5,
-    minWidth: 200,
-    valueFormatter: dateFormatter,
-  },
-  {
-    headerName: "Дата обнаружения",
-    field: "detectDate",
+    headerName: "Дата последнего изменения",
+    field: "update",
     flex: 5,
     minWidth: 200,
     valueFormatter: dateFormatter,
@@ -64,7 +56,7 @@ const columnDefs: ColDef<ObjectData>[] = [
         icon: "bi bi-eye",
         button: "btn-info",
         onClicked: (action, data) => {
-          mapDisplay.value?.flyToCoordinates?.(objectData.coordinates);
+          mapDisplay.value?.flyToCoordinates?.(objectData.location);
         },
       },
     ]),
@@ -76,12 +68,10 @@ const options: GridOptions<ObjectData> = {
 };
 
 function onMapReady() {
-  mapDisplay.value?.addMarker?.(objectData.coordinates);
+  mapDisplay.value?.addMarker?.(objectData.location);
 }
 
 const objectData = await getObjectData(
-  props.id,
-  props.name,
   props.objectIndex
 );
 </script>
