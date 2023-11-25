@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from osgeo import gdal
+import xml.etree.ElementTree as ET
 
 
 def get_image_RGB(image_name, geotif_bytes):
@@ -72,14 +73,32 @@ def connected_components(threshold, connectivity=8):
     return mask
 
 
-def find_contours(thresh):
+def find_contours(thresh, approx_eps = 0.001):
      # Find the contours in the input image
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_TC89_L1)
     # Аппроксимируем контур, чтобы уменьшить число точек.
     contours_approx = []
     for line in contours:
         # Преобразовываем координаты каждой точки из пикселей в широту и долготу.
-        eps = 0.0001 * cv2.arcLength(line, True)
+        eps = approx_eps * cv2.arcLength(line, True)
         line_approx = cv2.approxPolyDP(line, eps, True)
         contours_approx.append(line_approx)
     return contours_approx
+
+
+def parse_xml_slice(path_to_xml):
+    tree = ET.parse(path_to_xml)
+    root = tree.getroot()
+
+    coordinates = root.findall("BoundingBox")[0].attrib
+
+    return {
+        "type": "Polygon",
+        "coordinates": [
+            # Координаты в [y, x], так как leaflet работает в [lat, long].
+            [float(coordinates["miny"]), float(coordinates["minx"])],
+            [float(coordinates["miny"]), float(coordinates["maxx"])],
+            [float(coordinates["maxy"]), float(coordinates["maxx"])],
+            [float(coordinates["maxy"]), float(coordinates["minx"])],
+        ]
+    }

@@ -55,8 +55,8 @@ const columnDefs: ColDef<MapInfo>[] = [
   { headerName: "Id", field: "id", flex: 2, minWidth: 80 },
   { headerName: "Имя", field: "name", flex: 3, minWidth: 180 },
   {
-    headerName: "Дата последнего изменения",
-    field: "update",
+    headerName: "Дата загрузки",
+    field: "date",
     flex: 5,
     minWidth: 180,
     valueFormatter: dateFormatter,
@@ -89,8 +89,11 @@ const columnDefs: ColDef<MapInfo>[] = [
         tooltip: "Открыть карту",
         icon: "bi bi-map",
         button: "btn-secondary",
-        onClicked: (action, data) =>
-          router.push({ name: routeNames.Map, params: { id: data.id } }),
+        hide: (data) => !(data.ready && data.sliced),
+        onClicked: (action, data) => {
+          router.push({ name: routeNames.Map, params: { y: data.location.coordinates[0][0], 
+                                                        x: data.location.coordinates[0][1] } })
+        }
       },
       {
         tooltip: "Удалить карту",

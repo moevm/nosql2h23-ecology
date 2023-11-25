@@ -19,20 +19,29 @@ import {
   getActionsColDef,
   getDefaultGridOptions,
 } from "@/ag-grid/factory";
-import { ObjectData } from "@/types/objects";
-import { getObjectsData } from "@/components/routes/objects/api";
+import { ObjectInfo } from "@/types/objects";
+import { getObjectsInfo } from "@/components/routes/objects/api";
 import { dateFormatter } from "@/ag-grid/formatters";
 import { routeNames } from "@/router";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
 
-const columnDefs: ColDef<ObjectData>[] = [
+const columnDefs: ColDef<ObjectInfo>[] = [
   { headerName: "Id", field: "id", flex: 2, minWidth: 120 },
   { headerName: "Название", field: "name", flex: 4, minWidth: 180 },
+  { headerName: "Индекс", field: "objectIndex", flex: 4, minWidth: 180 },
+  { headerName: "Площадь", field: "area", flex: 4, minWidth: 120 },
   {
-    headerName: "Дата последнего изменения",
-    field: "update",
+    headerName: "Дата загрузки",
+    field: "uploadDate",
+    flex: 5,
+    valueFormatter: dateFormatter,
+    minWidth: 200,
+  },
+  {
+    headerName: "Дата обнаружения",
+    field: "detectDate",
     flex: 5,
     valueFormatter: dateFormatter,
     minWidth: 200,
@@ -47,7 +56,9 @@ const columnDefs: ColDef<ObjectData>[] = [
           router.push({
             name: routeNames.Object,
             params: {
-              id: data.id
+              id: data.id,
+              name: data.name,
+              objectIndex: data.objectIndex,
             },
           }),
       },
@@ -55,12 +66,12 @@ const columnDefs: ColDef<ObjectData>[] = [
   },
 ];
 
-const options: GridOptions<ObjectData> = {
+const options: GridOptions<ObjectInfo> = {
   ...getDefaultGridOptions(),
   domLayout: "autoHeight",
 };
 
-const data = await getObjectsData();
+const data = await getObjectsInfo();
 </script>
 
 <style scoped lang="scss"></style>

@@ -1,12 +1,12 @@
-export interface ObjectData {
+export interface ObjectInfo {
   id: string;
-  type: string;
   name: string;
-  color: string;
-  update: string;
-  location: [number, number];
+  objectIndex: string;
+  area: number;
+  uploadDate: string;
+  detectDate: string;
 }
-/*
+
 export interface ObjectData {
   id: string;
   name: string;
@@ -20,5 +20,5 @@ export interface ObjectData {
 export interface ObjectsMapData {
   name: string;
   color: string;
-  polygons: number[][][];
-}*/
+  polygons: number[][];
+}

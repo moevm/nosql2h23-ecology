@@ -3,26 +3,46 @@
 </template>
 
 <script setup lang="ts">
-import {
-  getXMLinfo,
-  getObjects,
-  initMap,
-  addTileLayerMap,
-  addObjects,
-} from "@/components/common/map/api";
-import { onMounted } from "vue";
+import { onMounted, onBeforeUnmount } from "vue";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import shadowUrl from "leaflet/dist/images/marker-shadow.png";
 
-let mapAndControl: { map: L.Map; controlLayer: L.Control.Layers } | null = null;
+import {
+  getMaps,
+  getObjects,
+  initMap,
+  addMaps,
+  addObjects,
+  updateViewMapsAnsObjects,
+  getMapSide
+} from "@/components/common/map/api";
+import { ObjectsMapData } from "@/types/objects";
+import { MapInfo } from "@/types/maps";
+
+
+let mapAndControl: { map: L.Map; controlLayer: L.Control.Layers, osmLayer: L.Layer };
 defineExpose({ addMarker, removeMarker, flyToCoordinates });
 
-const props = defineProps<{ id: string }>();
-const xmlImageInfoDoc = await getXMLinfo(props.id);
-let objectsList = await getObjects();
+const props = defineProps<{ y?: number; x?: number }>();
+let x = 30.308611;
+let y = 59.9375;
+if (props.x && props.y) {
+  x = props.x;
+  y = props.y;
+}
+
+let imagesList: MapInfo[];
+let objectsList: ObjectsMapData[];
+
+let timer: number;
+let oldPos = {
+  center: [0.0, 0.0] as unknown as L.LatLng, 
+  zoom: 10, 
+  layersDeleted: true
+};
 
 const emit = defineEmits<{ (e: "map-ready"): void }>();
 
@@ -39,21 +59,21 @@ onMounted(() => {
     shadowSize: [41, 41],
   });
 
-  mapAndControl = initMap();
-  if (objectsList) {
-    addObjects(mapAndControl.map, mapAndControl.controlLayer, objectsList);
-  }
+  mapAndControl = initMap(y, x);
+  oldPos.center = mapAndControl.map.getBounds().getCenter();
+  oldPos.zoom = mapAndControl.map.getZoom();
 
-  if (xmlImageInfoDoc) {
-    addTileLayerMap(
-      mapAndControl.map,
-      mapAndControl.controlLayer,
-      props.id,
-      xmlImageInfoDoc
-    );
-  }
+  // Задаем интервал на обновление отображаемых объектов.
+  timer = setInterval(() => {
+    updateViewMapsAnsObjects(mapAndControl, imagesList, objectsList, oldPos);
+  }, 1000);
 
   emit("map-ready");
+
+});
+
+onBeforeUnmount(() => {
+  clearInterval(timer);
 });
 
 // Создаем насколько функций для использования родительскими элементами для управления картой.
