@@ -5,6 +5,8 @@ from werkzeug.local import LocalProxy
 from flask import current_app as app
 from app.auth.User import User
 from app.db import get_db
+from app.services.user import get_user_by_id
+from app.utils import parse_json
 
 api = Namespace("auth", description="Аутентификация")
 
@@ -31,11 +33,11 @@ class Login(Resource):
             return 'Incorrect password', 400
         else:
             login_user(User(user), remember=True)
-            return 'Ok', 200
+            return 'Logged in', 200
 
     @login_required
     def get(self):
-        return f'Logged in'
+        return parse_json(get_user_by_id(current_user.get_id()))
 
     @login_required
     def delete(self):
