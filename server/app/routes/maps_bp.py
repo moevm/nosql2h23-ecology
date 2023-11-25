@@ -40,7 +40,7 @@ def get_images_list():
 
 @maps_bp.route('/tile_map_resource/<string:img_id>', methods=['GET'])
 def index(img_id):
-    tile_map_resource = maps_fs.files.find_one(ObjectId(img_id))["tile_map_resource"]
+    tile_map_resource = maps_fs.files.find_one(ObjectId(img_id)).find_one()["tile_map_resource"]
     if tile_map_resource is None:
         abort(404)
     else:
@@ -51,7 +51,7 @@ def index(img_id):
 def add_map():
     new_map = request.files['map']
     file_id = maps_fs.put(new_map, filename=request.form.get('name'),  chunk_size=256 * 1024,
-                          metadata={"location": "something",
+                          metadata={"location": [55, 55],
                                     "tile_map_resource": "something too",
                                     "size": "new_map.size() ?",
                                     "ready": False,
@@ -65,10 +65,10 @@ def add_map():
 
 @maps_bp.route('/delete_map/<string:map_id>', methods=['DELETE'])
 def delete_map(map_id):
-    map_info = maps_fs.files.find_one(ObjectId(map_id))
+    map_info = db.maps.files.find_one(ObjectId(map_id))
     if map_info:
         maps_fs.delete(ObjectId(map_id))
-        for tile in tiles_fs.files.find({"image_id": ObjectId(map_id)}):
+        for tile in db.tiles.files.find({"image_id": ObjectId(map_id)}):
             tiles_fs.delete(tile._id)
 
         socketio.emit("images", get_images_list()) #update sockets

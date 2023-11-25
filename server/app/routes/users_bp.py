@@ -18,3 +18,12 @@ redis: StrictRedis = LocalProxy(get_redis)
 
 users_bp = Blueprint('users_bp', __name__, url_prefix="/users")
 
+@users_bp.route('/add_user', methods=['POST'])
+def add_map():
+    db.users.insert({"login": "LOGIN",
+                     "password": "PASSWORD",
+                     "name": "Dmitriy",
+                     "status": "offline",
+                     "role": "admin"})
+
+    return jsonify({'message': 'User added successfully'})
