@@ -8,6 +8,7 @@ export const routeNames = {
   Map: "Map",
   Object: "Object",
   Home: "Home",
+  Auth: "Auth",
 };
 
 export const routePaths = {
@@ -18,6 +19,7 @@ export const routePaths = {
   [routeNames.Map]: "/map/:y?/:x?",
   [routeNames.Object]: "/object/:id/:name/:objectIndex",
   [routeNames.Home]: "/home",
+  [routeNames.Auth]: "/auth",
 };
 
 export const routes: RouteRecordRaw[] = [
@@ -64,6 +66,12 @@ export const routes: RouteRecordRaw[] = [
     name: routeNames.Home,
     path: routePaths[routeNames.Home],
     component: () => import("@/views/HomeView.vue"),
+  },
+
+  {
+    name: routeNames.Auth,
+    path: routePaths[routeNames.Auth],
+    component: () => import("@/views/AuthView.vue"),
   },
 ];
 

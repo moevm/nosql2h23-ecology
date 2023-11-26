@@ -34,6 +34,21 @@
           </li>
         </ul>
       </div>
+      <div class="fs-2 text-primary" role="button">
+        <i
+          v-if="userStore.isAuthed"
+          class="bi bi-box-arrow-left"
+          @click="logout"
+        ></i>
+        <router-link
+          v-else
+          :to="{ name: routeNames.Auth }"
+          class="nav-link"
+          active-class="text-info"
+        >
+          <i class="bi bi-box-arrow-in-right"></i>
+        </router-link>
+      </div>
     </div>
   </nav>
   <main>
@@ -45,6 +60,12 @@
 <script setup lang="ts">
 import { routeNames } from "@/router";
 import ToasterComponent from "@/components/common/ToasterComponent.vue";
+import { useUserStore } from "@/store/user";
+import { useToaster } from "@/store/toaster";
+import { ToastTypes } from "@/config/toast";
+
+const userStore = useUserStore(),
+  toaster = useToaster();
 
 const routes = [
   routeNames.Map,
@@ -60,6 +81,15 @@ const routesTranslation = {
   [routeNames.ObjectsList]: "Объекты",
   [routeNames.Upload]: "Загрузить",
 };
+
+async function logout() {
+  await userStore.logout();
+  toaster.addToast({
+    title: "Выполнено",
+    body: "Вы вышли из аккаунта",
+    type: ToastTypes.info,
+  });
+}
 </script>
 
 <style lang="scss">
