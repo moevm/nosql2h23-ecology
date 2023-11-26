@@ -1,5 +1,5 @@
 import io
-from flask import Blueprint, send_file
+from flask import Blueprint, send_file, abort
 from redis.client import StrictRedis
 from werkzeug.local import LocalProxy
 from bson.objectid import ObjectId
@@ -16,24 +16,66 @@ objects_bp = Blueprint('objects_bp', __name__, url_prefix="/objects")
 
 
 @objects_bp.route('/', methods=['GET'])
-def get_objects_info_list():
+def get_objects():
     objects = []
-    for one_object in db.objects.find({}):
-        one_object.append({
-            "id": str(one_object._id),
-            "type": one_object["type"],
-            "name": one_object["name"],
-            "color": one_object["color"],
-            "update": one_object["update"], #join?
-            "location": one_object["location"] #join?
+    for map_object in db.objects.find({}):
+        objects.append({
+            "id": str(map_object["_id"]),
+            "type": map_object["type"],
+            "name": map_object["name"],
+            "color": map_object["color"],
+            "updateUserId": map_object["update"]["user_id"],
+            "updateDatetime": map_object["update"]["datetime"],
+            "coordinates": map_object["coordinates"],
+            # Переворачиваем, чтобы получить [lat, lng] для leaflet
+            "center": [map_object["center"][1], map_object["center"][0]],
         })
     return objects
 
 
 @objects_bp.route('/<string:obj_id>', methods=['GET'])
-def index(obj_id):
-    obj = db.objects.find_one(ObjectId(obj_id))
-    if obj is None:
-        abort(404)
-    else:
-        return obj
+def get_object(obj_id):
+    map_object = db.objects.find_one(ObjectId(obj_id))
+    return {
+        "id": str(map_object["_id"]),
+        "type": map_object["type"],
+        "name": map_object["name"],
+        "color": map_object["color"],
+        "updateUserId": map_object["update"]["user_id"],
+        "updateDatetime": map_object["update"]["datetime"],
+        "coordinates": map_object["coordinates"],
+        # Переворачиваем, чтобы получить [lat, lng] для leaflet
+        "center": [map_object["center"][1], map_object["center"][0]],
+    }
+
+
+@objects_bp.route('/near/<string:y>/<string:x>/<string:r>', methods=['GET'])
+def images_near(y, x, r):
+    x, y, r = float(x), float(y), float(r)
+
+    objects_info = db.objects.find({
+        "center": {
+            "$nearSphere": {
+                "$geometry": {
+                    "type": "Point",
+                    "coordinates": [x, y]
+                },
+                "$maxDistance": r,
+            }
+        }
+    })
+
+    objects = []
+    for map_object in objects_info:
+        objects.append({
+            "id": str(map_object["_id"]),
+            "type": map_object["type"],
+            "name": map_object["name"],
+            "color": map_object["color"],
+            "updateUserId": map_object["update"]["user_id"],
+            "updateDatetime": map_object["update"]["datetime"],
+            "coordinates": map_object["coordinates"],
+            # Переворачиваем, чтобы получить [lat, lng] для leaflet
+            "center": [map_object["center"][1], map_object["center"][0]],
+        })
+    return objects

@@ -1,14 +1,10 @@
 import io
 import arrow
-from flask import Blueprint, jsonify, request, send_file, abort
+from flask import Blueprint, jsonify
 from redis.client import StrictRedis
 from werkzeug.local import LocalProxy
-from bson.objectid import ObjectId
 
-from app import socketio
 from app.db import get_db, get_tiles, get_maps, get_redis
-from app.tasks import process_image
-from app.tasks import slice
 
 
 db = LocalProxy(get_db)
@@ -19,7 +15,7 @@ redis: StrictRedis = LocalProxy(get_redis)
 users_bp = Blueprint('users_bp', __name__, url_prefix="/users")
 
 @users_bp.route('/add_user', methods=['POST'])
-def add_map():
+def add_user():
     db.users.insert({"login": "LOGIN",
                      "password": "PASSWORD",
                      "name": "Dmitriy",
