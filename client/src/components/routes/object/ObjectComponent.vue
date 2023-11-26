@@ -13,39 +13,38 @@
 
 <script setup lang="ts">
 import { ColDef, GridOptions } from "ag-grid-community";
-import { ObjectData } from "@/types/objects";
+import { ObjectInfo } from "@/types/objects";
 import { dateFormatter } from "@/ag-grid/formatters";
 import {
   fitActionsColumn,
   getActionsColDef,
   getDefaultGridOptions,
 } from "@/ag-grid/factory";
-import { getObjectData } from "@/components/routes/object/api";
+import { getObjectsInfo } from "@/components/routes/object/api";
 import { AgGridVue } from "ag-grid-vue3";
 import { useRouter } from "vue-router";
 import { routeNames } from "@/router";
 
 
 const router = useRouter();
-const props = defineProps<{ id: string; name: string; objectIndex: string }>();
+const props = defineProps<{ id: string }>();
 
-const columnDefs: ColDef<ObjectData>[] = [
-  { headerName: "Название", field: "name", flex: 4, minWidth: 180 },
-  { headerName: "Индекс", field: "objectIndex", flex: 4, minWidth: 180 },
-  { headerName: "Площадь", field: "area", flex: 4, minWidth: 180 },
+const columnDefs: ColDef<ObjectInfo>[] = [
+  { headerName: "Id", field: "id", flex: 2, minWidth: 120 },
+  { headerName: "Тип", field: "type", flex: 4, minWidth: 80 },
+  { headerName: "Название", field: "name", flex: 4, minWidth: 80 },
   {
     headerName: "Дата загрузки",
-    field: "uploadDate",
+    field: "updateDatetime",
     flex: 5,
-    minWidth: 200,
+    minWidth: 180,
     valueFormatter: dateFormatter,
   },
   {
-    headerName: "Дата обнаружения",
-    field: "detectDate",
+    headerName: "Id загрузившего пользователя",
+    field: "updateUserId",
     flex: 5,
-    minWidth: 200,
-    valueFormatter: dateFormatter,
+    minWidth: 100,
   },
   {
     ...getActionsColDef([
@@ -54,22 +53,21 @@ const columnDefs: ColDef<ObjectData>[] = [
         icon: "bi bi-eye",
         button: "btn-info",
         onClicked: (action, data) => {
-          router.push({ name: routeNames.Map, params: { id: data.id }});
+          router.push({ name: routeNames.Map, params: { 
+            y: data.center[0],
+            x: data.center[1]}
+          });
         },
       },
     ]),
   },
 ];
 
-const options: GridOptions<ObjectData> = {
+const options: GridOptions<ObjectInfo> = {
   ...getDefaultGridOptions(),
 };
 
-const objectData = await getObjectData(
-  props.id,
-  props.name,
-  props.objectIndex
-);
+const objectData = await getObjectsInfo(props.id);
 </script>
 
 <style scoped lang="scss"></style>

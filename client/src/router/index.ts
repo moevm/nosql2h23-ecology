@@ -16,7 +16,7 @@ export const routePaths = {
   [routeNames.ObjectsList]: "/objects",
   [routeNames.Upload]: "/upload",
   [routeNames.Map]: "/map/:y?/:x?",
-  [routeNames.Object]: "/object/:id/:name/:objectIndex",
+  [routeNames.Object]: "/object/:id",
   [routeNames.Home]: "/home",
 };
 
@@ -55,9 +55,7 @@ export const routes: RouteRecordRaw[] = [
     path: routePaths[routeNames.Object],
     component: () => import("@/views/ObjectView.vue"),
     props: (route) => ({
-      id: route.params.id,
-      name: route.params.name,
-      objectIndex: route.params.objectIndex,
+      id: route.params.id
     }),
   },
   {

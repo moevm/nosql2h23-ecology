@@ -15,6 +15,7 @@ class ObjectBase:
         self.img_id = img_id
         self.image_bytes = image_bytes
         self.polygons = []
+        self.centers = []
         self.area = []
         self.max_area = 0
         
@@ -47,10 +48,20 @@ class ObjectBase:
         for line in contours_of_object:
             # Преобразовываем координаты каждой точки из пикселей в широту и долготу.
             line_arr = []
+            curr_center = [0, 0]
 
             for point in line:
                 x_pix, y_pix = point[0]
-                line_arr.append(coord_transformer.pixel_xy_to_lat_long(x_pix, y_pix))
+                point_transf = coord_transformer.pixel_xy_to_lat_long(x_pix, y_pix)
+                line_arr.append(point_transf)
+                
+                curr_center[0] += point_transf[0]
+                curr_center[1] += point_transf[1]
+
+            # Переворачиваем координаты из [lat, lng] получаем [lng, lat]
+            curr_center[1], curr_center[0] = curr_center[0] / len(line_arr), curr_center[1] / len(line_arr)
+            self.centers.append(curr_center)
+
             self.polygons.append(line_arr)
             self.update(step_progress)
 
@@ -100,6 +111,7 @@ class ObjectBase:
             if (self.area[i] < min_area):
                 self.area.pop(i)
                 self.polygons.pop(i)
+                self.centers.pop(i)
             else:
                 i += 1
 
@@ -128,36 +140,27 @@ class ObjectBase:
         '''
         db = local.db
         redis = local.redis
-        image_info = db.images.find_one(ObjectId(self.img_id))
+        
         queue_item = f'queue:{self.img_id}'
         
         if (len(self.polygons) > 0):
-            # Формируем словарь найденных объектов.
-            object_dict = {
-                'name': self.name,
-                'color': self.color,
-                'polygons': self.polygons,
-                'area': self.area
-            }
-
-            # Добавляем словарь найденных объектов в базу данных.
-            objects_list = image_info['objects']
-            objects_list.append(object_dict)
-            db.images.update_one({"_id": image_info['_id']}, {"$set": {"objects": objects_list}})
-            db.images.update_one({"_id": image_info['_id']}, {"$set": {"detect_date": str(arrow.now().to('UTC'))}})
+            # Добавляем найденные объекты в базу данных.
+            objects = []
+            for i in range(len(self.polygons)):
+                objects.append({
+                    # TO DO: name == type?
+                    "type": self.name,
+                    "name": self.name,
+                    "color": self.color,
+                    # TO DO: -1 индекс - это автоматическая обработка?
+                    "update": {"user_id": -1, "datetime": str(arrow.now().to('UTC'))},
+                    "coordinates": self.polygons[i],
+                    "center": self.centers[i],
+                })
+            db.objects.insert_many(objects)
 
         # Удаляем запись в redis-е, если обработки всех объектов завершились.
         redis.hset(queue_item, 'processing_functions', int(redis.hget(queue_item, 'processing_functions')) - 1)
         if int(redis.hget(queue_item, 'processing_functions')) == 0:
             redis.delete(queue_item)
-            db.images.update_one({"_id": image_info['_id']}, {"$set": {"ready": True}})
-
-    def get_object_by_index(self, index):
-        '''
-        Метод, который возвращает одну объект из найденных на изображении.
-        '''
-        return {
-            'index': index,
-            'polygon': self.polygons[index],
-            'area': self.area[index]
-        }
+            db.maps.files.update_one({"_id": ObjectId(self.img_id)}, {"$set": {"ready": True}})
