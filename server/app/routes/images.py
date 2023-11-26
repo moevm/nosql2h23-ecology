@@ -20,20 +20,20 @@ api = Namespace("images", description="Операции с изображени�
 
 
 def get_images_list():
-    images = []
-    for img in db.images.find({}):
-        images.append({
-            "id": str(img["_id"]),
-            "name": img["name"],
-            'uploadDate': img["upload_date"],
-            'size': maps_fs.find_one({'_id': img["fs_id"]}).length,
-            "location": img["location"],
-            "ready": img["ready"],
-            "sliced": img["sliced"]
+    maps = []
+    for map in db.maps.files.find({}):
+        maps.append({
+            "id": str(map["_id"]),
+            "name": map["name"],
+            "updateUserId": map["update"]["user_id"],
+            "updateDatetime": map["update"]["datetime"],
+            "coordinates": map["coordinates"],
+            # Переворачиваем, чтобы получить [lat, lng] для leaflet
+            "center": [map["center"][1], map["center"][0]],
+            "ready": map["ready"],
+            "sliced": map["sliced"]
         })
-
-    return images
-
+    return maps
 
 @api.route('/')
 class ImagesList(Resource):
@@ -41,25 +41,21 @@ class ImagesList(Resource):
         return get_images_list()
 
     def post(self):
-        image = request.files['image']
-        file_id = maps_fs.put(image, filename=image.filename, chunk_size=256 * 1024)
+        new_map = request.files['image']
         img_name = request.form.get('name')
-        item = {
-            "location": {"type": "Polygon", "coordinates": []},
-            "fs_id": file_id,
-            "objects": [],
-            "upload_date": str(arrow.now().to('UTC')),
-            "detect_date": "",
-            "name": img_name,
-            'ready': False,
-            'sliced': False
-        }
+        file_id = maps_fs.put(
+            new_map, filename=request.form.get('name'),  chunk_size= 256 * 1024,
+            name = img_name,
+            center = [0.5, 0.5],
+            coordinates = [[0, 1], [1, 1], [1, 0], [0, 0]],
+            # TO DO: normal user_id.
+            update = {"user_id": 0, "datetime": str(arrow.now().to('UTC'))},
+            ready = False,
+            sliced = False
+        )
 
-        result = db.images.insert_one(item)
-        img_id = result.inserted_id
-
-        slice.delay(str(img_id))
-        process_image.delay(str(img_id))
+        slice.delay(str(file_id))
+        process_image.delay(str(file_id))
 
         return jsonify({'message': 'Image added successfully'})
 
@@ -68,65 +64,48 @@ class ImagesList(Resource):
 class ImageFinder(Resource):
     def get(self, y, x, r):
         x, y, r = float(x), float(y), float(r)
-        # TO DO: после рефакторинга бд должно находится НОРМАЛЬНО, а не в цикле :(
-        images = []
-        for img in db.images.find({}):
-            # Координаты в [y, x], так как leaflet работает в [lat, long].
-            if (img["sliced"]):
-                y_point_img, x_point_img = img["location"]["coordinates"][0]
-                if (x_point_img - x) ** 2 + (y_point_img - y) ** 2 <= r ** 2:
-                    images.append({
-                        "id": str(img["_id"]),
-                        "name": img["name"],
-                        'uploadDate': img["upload_date"],
-                        'size': maps_fs.find_one({'_id': img["fs_id"]}).length,
-                        "location": img["location"],
-                        "ready": img["ready"],
-                        "sliced": img["sliced"]
-                    })
-        return images
 
+        maps_info = db.maps.files.find({
+            "center": {
+                "$nearSphere": {
+                    "$geometry": {
+                        "type": "Point",
+                        "coordinates": [x, y]
+                    },
+                    "$maxDistance": r,
+                }
+            }, 
+            "sliced": True
+        })
 
-@api.route('/tile_map_resource/<string:img_id>')
-class TileResources(Resource):
-    def get(self, img_id):
-        tile_map_resource = db.images.find_one(ObjectId(img_id))["tile_map_resource"]
-        if tile_map_resource is None:
-            abort(404)
-        else:
-            return db.images.find_one(ObjectId(img_id))["tile_map_resource"]
+        maps = []
+        for map in maps_info:
+            maps.append({
+                "id": str(map["_id"]),
+                "name": map["name"],
+                "updateUserId": map["update"]["user_id"],
+                "updateDatetime": map["update"]["datetime"],
+                "coordinates": map["coordinates"],
+                # Переворачиваем, чтобы получить [lat, lng] для leaflet
+                "center": [map["center"][1], map["center"][0]],
+                "ready": map["ready"],
+                "sliced": map["sliced"]
+            })
+        return maps
 
 
 @api.route('/image/<string:img_id>')
 class Image(Resource):
     def delete(self, img_id):
-        image_info = db.images.find_one(ObjectId(img_id))
-        if (image_info):
-            fs_id = image_info["fs_id"]
+        map_info = db.maps.files.find_one(ObjectId(v))
 
-            db.images.delete_one({"_id": ObjectId(img_id)})
+        if map_info:
+            maps_fs.delete(ObjectId(img_id))
+            for tile in db.tiles.files.find({"image_id": ObjectId(img_id)}):
+                tiles_fs.delete(tile["_id"])
 
-            maps_fs.delete(fs_id)
-            for tile in tiles_fs.find({"image_id": ObjectId(img_id)}):
-                tiles_fs.delete(tile._id)
-
-            socketio.emit("images", get_images_list())
+            socketio.emit("images", get_images_list()) #update sockets
             return jsonify({'message': 'Image deleted successfully'})
+        
         return 'OK'
 
-
-# Маршрут для leaflet-а, возвращает кусочки для отображения.
-@api.route("/tile/<string:img_id>/<int:z>/<int:x>/<int:y>")
-class Tile(Resource):
-    def get(self, img_id, z, x, y):
-        tile = tiles_fs.find_one({'image_id': ObjectId(img_id), 'z': z, 'x': x, 'y': y})
-        if tile:
-            return send_file(io.BytesIO(tile.read()), mimetype='image/png')
-        else:
-            return 'OK'
-
-
-@api.route('/objects/<string:img_id>')
-class ObjectsFinder(Resource):
-    def get(self, img_id):
-        return db.images.find_one(ObjectId(img_id))["objects"]
