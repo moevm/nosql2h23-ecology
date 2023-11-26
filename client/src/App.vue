@@ -74,17 +74,18 @@ import { useUserStore } from "@/store/user";
 import { useToaster } from "@/store/toaster";
 import { ToastTypes } from "@/config/toast";
 import { UserRole } from "@/config/users";
+import { computed } from "vue";
 
 const userStore = useUserStore(),
   toaster = useToaster();
 
-const routes = [
+const routes = computed(() => [
   routeNames.Map,
   routeNames.MapsList,
   routeNames.Queue,
   routeNames.ObjectsList,
-  routeNames.Upload,
-];
+  ...(userStore.isAuthed ? [routeNames.Upload] : []),
+]);
 const routesTranslation = {
   [routeNames.Map]: "Глобальная карта",
   [routeNames.MapsList]: "Карты",
