@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { computed, readonly, ref } from "vue";
-import { User } from "@/components/routes/auth/types";
+import { User } from "@/types/users";
 import { UserAPI } from "@/components/routes/auth/api";
 
 export const useUserStore = defineStore("user", () => {

@@ -1,19 +1,19 @@
 import { api } from "@/api";
-import { User } from "@/components/routes/auth/types";
+import { User } from "@/types/users";
 
-export function fetchUser() {
+function fetchUser() {
   return api.get<User>("/auth/login");
 }
 
-export function login(login: string, password: string) {
+function login(login: string, password: string) {
   return api.post<User>("/auth/login", { login, password });
 }
 
-export function logout() {
+function logout() {
   return api.delete("/auth/login");
 }
 
-export function devLogin() {
+function devLogin() {
   return api.get<User>("/auth/login/dev");
 }
 
