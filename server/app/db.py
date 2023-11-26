@@ -11,6 +11,9 @@ def get_db():
         client = pymongo.MongoClient(app.config.get('MONGO_URI'))  # config['PROD']['DB_URI']
         # Если есть база данных ecologyDB
         db = g.database = client.get_database('ecologyDB')
+        # Создание Геоиндексов.
+        db.maps.files.create_index([("center", pymongo.GEOSPHERE)])
+        db.objects.create_index([("center", pymongo.GEOSPHERE)])
     return db
 
 

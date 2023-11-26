@@ -52,12 +52,10 @@ class ObjectDeforestation(ObjectBase):
     @staticmethod
     @app.task(name='deforestation_find', queue="image_process")
     def create_and_process(img_id):
-        db = local.db
         maps_fs = local.maps_fs
-        image_info = db.images.find_one(ObjectId(img_id))
         
         # Получаем саму картинку из GridFS.
-        image_bytes = maps_fs.get(ObjectId(image_info['fs_id'])).read()
+        image_bytes = maps_fs.find_one(ObjectId(img_id)).read()
 
         deforestation_object = ObjectDeforestation(img_id, image_bytes)
         ObjectBase.process_object(deforestation_object)

@@ -59,18 +59,16 @@ const columnDefs: ColDef<MapInfo>[] = [
   { headerName: "Имя", field: "name", flex: 3, minWidth: 180 },
   {
     headerName: "Дата загрузки",
-    field: "date",
+    field: "updateDatetime",
     flex: 5,
     minWidth: 180,
     valueFormatter: dateFormatter,
   },
   {
-    headerName: "Размер",
-    field: "size",
+    headerName: "Id загрузившего пользователя",
+    field: "updateUserId",
     flex: 5,
-    minWidth: 180,
-    valueFormatter: ({ value }: { value: number }) =>
-      `${Math.round(value / 1048576)} Мб`,
+    minWidth: 100,
   },
   {
     headerName: "Обработано",
@@ -94,14 +92,9 @@ const columnDefs: ColDef<MapInfo>[] = [
         button: "btn-secondary",
         hide: (data) => !(data.ready && data.sliced),
         onClicked: (action, data) => {
-          router.push({
-            name: routeNames.Map,
-            params: {
-              y: data.location.coordinates[0][0],
-              x: data.location.coordinates[0][1],
-            },
-          });
-        },
+          router.push({ name: routeNames.Map, params: { y: data.center[0],
+                                                        x: data.center[1] } })
+        }
       },
       {
         tooltip: "Удалить карту",

@@ -3,6 +3,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
 import { onMounted, onBeforeUnmount } from "vue";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -11,20 +12,15 @@ import iconUrl from "leaflet/dist/images/marker-icon.png";
 import shadowUrl from "leaflet/dist/images/marker-shadow.png";
 
 import {
-  getMaps,
-  getObjects,
   initMap,
-  addMaps,
-  addObjects,
   updateViewMapsAnsObjects,
-  getMapSide
 } from "@/components/common/map/api";
-import { ObjectsMapData } from "@/types/objects";
+import { ObjectInfo } from "@/types/objects";
 import { MapInfo } from "@/types/maps";
 
 
 let mapAndControl: { map: L.Map; controlLayer: L.Control.Layers, osmLayer: L.Layer };
-defineExpose({ addMarker, removeMarker, flyToCoordinates });
+defineExpose({ addMarker, removeMarker, flyToCoordinates, getObjects });
 
 const props = defineProps<{ y?: number; x?: number }>();
 let x = 30.308611;
@@ -35,7 +31,7 @@ if (props.x && props.y) {
 }
 
 let imagesList: MapInfo[];
-let objectsList: ObjectsMapData[];
+let objectsList = ref<ObjectInfo[]>([]);
 
 let timer: number;
 let oldPos = {
@@ -44,7 +40,7 @@ let oldPos = {
   layersDeleted: true
 };
 
-const emit = defineEmits<{ (e: "map-ready"): void }>();
+const emit = defineEmits<{ (e: "map-ready"): void, (e: "objects-updated"): void }>();
 
 onMounted(() => {
   // Загружаем картинки и параметры маркера в leaflet
@@ -65,7 +61,7 @@ onMounted(() => {
 
   // Задаем интервал на обновление отображаемых объектов.
   timer = setInterval(() => {
-    updateViewMapsAnsObjects(mapAndControl, imagesList, objectsList, oldPos);
+    updateViewMapsAnsObjects(mapAndControl, imagesList, objectsList, oldPos, emit);
   }, 1000);
 
   emit("map-ready");
@@ -87,7 +83,14 @@ function removeMarker(marker: L.Marker) {
 }
 
 function flyToCoordinates(coordinates: [number, number]) {
-  if (mapAndControl) mapAndControl.map.panTo(coordinates);
+  if (mapAndControl) {
+    mapAndControl.map.setZoom(14);
+    mapAndControl.map.panTo(coordinates);
+  }
+}
+
+function getObjects() {
+  return objectsList.value;
 }
 </script>
 
