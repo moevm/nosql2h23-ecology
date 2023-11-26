@@ -33,7 +33,7 @@ class Login(Resource):
             return 'Incorrect password', 400
         else:
             login_user(User(user), remember=True)
-            return 'Logged in', 200
+            return parse_json(get_user_by_id(current_user.get_id())), 200
 
     @login_required
     def get(self):
@@ -58,4 +58,4 @@ class Login(Resource):
             })
             admin = db.users.find_one(result.inserted_id)
         login_user(User(admin), remember=True)
-        return "Logged in as root"
+        return parse_json(get_user_by_id(current_user.get_id()))

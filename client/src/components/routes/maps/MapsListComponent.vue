@@ -48,8 +48,11 @@ import FlagRenderer from "@/components/renderers/FlagRenderer.vue";
 import Modal from "@/components/common/Modal.vue";
 import { useImages } from "@/api/websocket/images";
 import { ref } from "vue";
+import { useUserStore } from "@/store/user";
 
 const router = useRouter();
+
+const userStore = useUserStore();
 
 const columnDefs: ColDef<MapInfo>[] = [
   { headerName: "Id", field: "id", flex: 2, minWidth: 80 },
@@ -89,7 +92,7 @@ const columnDefs: ColDef<MapInfo>[] = [
         button: "btn-secondary",
         hide: (data) => !(data.ready && data.sliced),
         onClicked: (action, data) => {
-          router.push({ name: routeNames.Map, params: { y: data.center[0], 
+          router.push({ name: routeNames.Map, params: { y: data.center[0],
                                                         x: data.center[1] } })
         }
       },
@@ -97,7 +100,7 @@ const columnDefs: ColDef<MapInfo>[] = [
         tooltip: "Удалить карту",
         icon: "bi bi-trash",
         button: "btn-danger",
-        hide: (data) => !(data.ready && data.sliced),
+        hide: (data) => !(data.ready && data.sliced) || !userStore.isAuthed,
         onClicked: (action, data) => {
           delElement.value = data.id;
           modal.value?.open();

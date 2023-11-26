@@ -9,12 +9,20 @@ import { vBsTooltip } from "@/bootstrap/tooltip";
 import { plugin, defaultConfig } from "@formkit/vue";
 import "@formkit/themes/genesis";
 import { createPinia } from "pinia";
+import { useUserStore } from "@/store/user";
 
-const pinia = createPinia();
+async function bootstrap() {
+  const pinia = createPinia();
 
-const app = createApp(App);
-app.use(router);
-app.use(plugin, defaultConfig());
-app.use(pinia);
-app.directive("bs-tooltip", vBsTooltip);
-app.mount("#app");
+  const userStore = useUserStore(pinia);
+  await userStore.fetchUser();
+
+  const app = createApp(App);
+  app.use(router);
+  app.use(plugin, defaultConfig());
+  app.use(pinia);
+  app.directive("bs-tooltip", vBsTooltip);
+  app.mount("#app");
+}
+
+bootstrap();

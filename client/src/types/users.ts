@@ -1,7 +1,9 @@
-export interface UserInfo {
-  id: string;
+export interface User {
+  _id: {
+    $oid: string;
+  };
   login: string;
   password: string;
-  status: string;
+  name: string;
   role: string;
 }

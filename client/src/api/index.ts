@@ -8,6 +8,7 @@ export const baseURL = `${serverURL}/api`;
 
 export const api: AxiosInstance = axios.create({
   baseURL,
+  withCredentials: true,
 });
 
 const min_map_zoom = import.meta.env.MIN_ZOOM ?? 1;

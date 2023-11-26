@@ -32,7 +32,32 @@
               О проекте
             </router-link>
           </li>
+
+          <li v-if="userStore.role === UserRole.admin" class="nav-item ps-4">
+            <router-link
+              :to="{ name: routeNames.Users }"
+              class="nav-link text-warning"
+              active-class="text-info"
+            >
+              Пользователи
+            </router-link>
+          </li>
         </ul>
+      </div>
+      <div class="fs-2 text-primary" role="button">
+        <i
+          v-if="userStore.isAuthed"
+          class="bi bi-box-arrow-left"
+          @click="logout"
+        />
+        <router-link
+          v-else
+          :to="{ name: routeNames.Auth }"
+          class="nav-link"
+          active-class="text-info"
+        >
+          <i class="bi bi-box-arrow-in-right" />
+        </router-link>
       </div>
     </div>
   </nav>
@@ -45,14 +70,22 @@
 <script setup lang="ts">
 import { routeNames } from "@/router";
 import ToasterComponent from "@/components/common/ToasterComponent.vue";
+import { useUserStore } from "@/store/user";
+import { useToaster } from "@/store/toaster";
+import { ToastTypes } from "@/config/toast";
+import { UserRole } from "@/config/users";
+import { computed } from "vue";
 
-const routes = [
+const userStore = useUserStore(),
+  toaster = useToaster();
+
+const routes = computed(() => [
   routeNames.Map,
   routeNames.MapsList,
   routeNames.Queue,
   routeNames.ObjectsList,
-  routeNames.Upload,
-];
+  ...(userStore.isAuthed ? [routeNames.Upload] : []),
+]);
 const routesTranslation = {
   [routeNames.Map]: "Глобальная карта",
   [routeNames.MapsList]: "Карты",
@@ -60,6 +93,15 @@ const routesTranslation = {
   [routeNames.ObjectsList]: "Объекты",
   [routeNames.Upload]: "Загрузить",
 };
+
+async function logout() {
+  await userStore.logout();
+  toaster.addToast({
+    title: "Выполнено",
+    body: "Вы вышли из аккаунта",
+    type: ToastTypes.info,
+  });
+}
 </script>
 
 <style lang="scss">
