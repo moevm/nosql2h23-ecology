@@ -4,6 +4,6 @@ import { baseURL } from "@/api";
 
 export async function getObjectsInfo(id: string): Promise<ObjectInfo> {
   return (
-    await axios.get<ObjectInfo>(baseURL + "/objects/" + id)
+    await axios.get<ObjectInfo>(baseURL + "/objects/object/" + id)
   ).data;
 }

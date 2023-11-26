@@ -3,9 +3,9 @@ import axios from "axios";
 import { baseURL } from "@/api";
 
 export async function getMapsInfo(): Promise<MapInfo[]> {
-  return (await axios.get<MapInfo[]>(baseURL + "/maps/")).data;
+  return (await axios.get<MapInfo[]>(baseURL + "/images/")).data;
 }
 
 export function deleteMap(id: string) {
-  return axios.delete(baseURL + "/maps/delete_map/" + id);
+  return axios.delete(baseURL + "/images/image/" + id);
 }

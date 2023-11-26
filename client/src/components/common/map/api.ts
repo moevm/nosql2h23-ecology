@@ -13,7 +13,7 @@ export async function getMaps(
   r: number
 ): Promise<MapInfo[] | void> {
   return (
-    await axios.get<MapInfo[]>(baseURL + "/maps/near/" + y + "/" + x + "/" + r)
+    await axios.get<MapInfo[]>(baseURL + "/images/near/" + y + "/" + x + "/" + r)
   ).data;
 }
 
@@ -63,7 +63,7 @@ export function addMaps(
   for (let i = 0; i < imagesList.length; i++) {
     // Overlay layers (TMS).
     const lyr: L.Layer = L.tileLayer(
-      baseURL + "/tiles/" + imagesList[i].id + "/{z}/{x}/{y}",
+      baseURL + "/tiles/tile/" + imagesList[i].id + "/{z}/{x}/{y}",
       { tms: true, opacity: 1, attribution: "" }
     );
 
