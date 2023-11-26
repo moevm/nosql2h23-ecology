@@ -92,13 +92,10 @@ def parse_xml_slice(path_to_xml):
 
     coordinates = root.findall("BoundingBox")[0].attrib
 
-    return {
-        "type": "Polygon",
-        "coordinates": [
+    return [
             # Координаты в [y, x], так как leaflet работает в [lat, long].
             [float(coordinates["miny"]), float(coordinates["minx"])],
             [float(coordinates["miny"]), float(coordinates["maxx"])],
             [float(coordinates["maxy"]), float(coordinates["maxx"])],
             [float(coordinates["maxy"]), float(coordinates["minx"])],
         ]
-    }

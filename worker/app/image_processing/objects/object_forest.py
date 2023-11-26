@@ -47,15 +47,13 @@ class ObjectForest(ObjectBase):
     @staticmethod
     @app.task(name='forest_find', queue="image_process")
     def create_and_process(img_id):
-        db = local.db
         maps_fs = local.maps_fs
-        map_file = maps_fs.find_one(ObjectId(img_id))
 
         # Получаем саму картинку из GridFS.
-        image_bytes = maps_fs.get(ObjectId(map_file['fs_id'])).read()
+        image_bytes = maps_fs.get(ObjectId(img_id)).read()
 
         forest_object = ObjectForest(img_id, image_bytes)
         ObjectBase.process_object(forest_object)
-        forest_object.filter_polygons_by_area(10)
+        forest_object.filter_polygons_by_area(forest_object.max_area / 4)
         forest_object.after_end_of_process()
         return "Processing completed"

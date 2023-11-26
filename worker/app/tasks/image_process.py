@@ -10,8 +10,8 @@ from app.image_processing.objects.object_deforestation import ObjectDeforestatio
 def process_image(map_id: str):
     db = local.db
     redis = local.redis
-    maps_fs = local.maps_fs
-    map_file = db.maps.find_one(ObjectId(map_id))
+    
+    map_info = db.maps.files.find_one(ObjectId(map_id))
     
     # 
     ## Список объектов для поиска
@@ -22,10 +22,10 @@ def process_image(map_id: str):
     # Создаем запись в redis-е для отображения очереди на клиенте.
     queue_item = f'queue:{map_id}'
     redis.hset(queue_item, mapping={
-        'id': str(map_id),
+        'id': map_id,
         'progress': 0,
-        'name': map_file['name'],
-        'uploadDate': map_file['update'],
+        'name': map_info['name'],
+        'uploadDate': map_info['update']["datetime"],
         'status': 'enqueued',
         'processing_functions_immut': len(objects),
         'processing_functions': len(objects)

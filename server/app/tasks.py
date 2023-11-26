@@ -12,11 +12,11 @@ def delete_all_data_in_db_and_fs():
 
 
 @app.task(name='image_process', queue="image_process")
-def process_image(map_id):
+def process_image(image_id):
     pass
 
 @app.task(name='slice', queue="slice")
-def slice(map_id):
+def slice(image_id):
     pass
 
 
