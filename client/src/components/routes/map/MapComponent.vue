@@ -1,29 +1,26 @@
 <template>
   <div class="container-lg">
-    <!-- TO DO: Нужно будет вернуть, но с данными по оббъектам не одной карты, а выделенным объектам. -->
-    <!-- <div v-if="mapData && mapData.length" class="row justify-content-between">
+    <div class="row justify-content-between">
       <h3 class="col">Объекты</h3>
     </div>
     <AgGridVue
-      v-if="mapData && mapData.length"
       class="ag-theme-alpine mt-3"
-      :row-data="mapData"
+      :row-data="objectsInfo"
       :column-defs="columnDefs"
       :grid-options="options"
       @grid-ready="fitActionsColumn"
-    /> -->
+    />
     <div class="d-flex justify-content-center mt-3">
-      <MapDisplay :x="x" :y="y" ref="mapDisplay"/>
+      <MapDisplay :x="x" :y="y" ref="mapDisplay" @objects-updated="objectsShow"/>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { getMapData } from "@/components/routes/map/api";
 import { AgGridVue } from "ag-grid-vue3";
 import { ColDef, GridOptions } from "ag-grid-community";
-import { ObjectData } from "@/types/objects";
+import { ObjectInfo } from "@/types/objects";
 import {
   fitActionsColumn,
   getActionsColDef,
@@ -44,10 +41,34 @@ const props = defineProps<{
 const mapDisplay = ref<InstanceType<typeof MapDisplay>>();
 let lastMarker: L.Marker | undefined = undefined;
 
-const columnDefs: ColDef<ObjectData>[] = [
+// Надеюсь, никто не заметит этот костыль, чтобы прогружались action-ы сразу :)
+const objectsInfo = ref<ObjectInfo[]>([{
+  id: "-",
+  type: "-",
+  name: "-",
+  color: "-",
+  updateUserId: "-",
+  updateDatetime: "-",
+  center: [0, 0],
+  coordinates: [[0, 0]]
+}]);
+
+const columnDefs: ColDef<ObjectInfo>[] = [
   { headerName: "Id", field: "id", flex: 2, minWidth: 120 },
-  { headerName: "Название", field: "name", flex: 4, minWidth: 180 },
-  { headerName: "Площадь", field: "area", flex: 4, minWidth: 180 },
+  { headerName: "Тип", field: "type", flex: 4, minWidth: 80 },
+  { headerName: "Название", field: "name", flex: 4, minWidth: 80 },
+  {
+    headerName: "Дата загрузки",
+    field: "updateDatetime",
+    flex: 5,
+    minWidth: 180,
+  },
+  {
+    headerName: "Id загрузившего пользователя",
+    field: "updateUserId",
+    flex: 5,
+    minWidth: 200,
+  },
   {
     ...getActionsColDef([
       {
@@ -59,8 +80,6 @@ const columnDefs: ColDef<ObjectData>[] = [
             name: routeNames.Object,
             params: {
               id: data.id,
-              name: data.name,
-              objectIndex: data.objectIndex,
             },
           }),
       },
@@ -72,44 +91,26 @@ const columnDefs: ColDef<ObjectData>[] = [
           if (lastMarker) {
             mapDisplay.value?.removeMarker?.(lastMarker);
           }
-          lastMarker = mapDisplay.value?.addMarker?.(data.coordinates);
-          mapDisplay.value?.flyToCoordinates?.(data.coordinates);
+          lastMarker = mapDisplay.value?.addMarker?.(data.center);
+          mapDisplay.value?.flyToCoordinates?.(data.center);
         },
       },
     ]),
-  },
+  }
 ];
 
-const options: GridOptions<ObjectData> = {
+const options: GridOptions<ObjectInfo> = {
   ...getDefaultGridOptions(),
   pagination: true,
   paginationPageSize: 4,
   domLayout: "autoHeight",
 };
 
-// function onMapReady() {
-//   if (props.name && props.objectIndex) {
-//     let coordinates: [number, number] = [0, 0];
-//     for (let i = 0; i < mapData.length; i++) {
-//       if (
-//         mapData[i].name === props.name &&
-//         mapData[i].objectIndex == props.objectIndex
-//       ) {
-//         coordinates = mapData[i].coordinates;
-//         break;
-//       }
-//     }
-//     if (lastMarker) {
-//       mapDisplay.value?.removeMarker?.(lastMarker);
-//     }
-//     lastMarker = mapDisplay.value?.addMarker?.(coordinates);
-//   }
-// }
+function objectsShow() {
+  let objects = mapDisplay.value?.getObjects?.();
+  objectsInfo.value = objects ? objects : []
+}
 
-// let mapData: ObjectData[];
-// if (props.id) {
-//   mapData = await getMapData(props.id);
-// }
 </script>
 
 <style scoped lang="scss"></style>

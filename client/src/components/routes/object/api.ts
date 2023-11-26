@@ -1,11 +1,9 @@
-import { ObjectData } from "@/types/objects";
+import { ObjectInfo } from "@/types/objects";
 import axios from "axios";
 import { baseURL } from "@/api";
 
-export async function getObjectData(objectIndex: string): Promise<ObjectData> {
+export async function getObjectsInfo(id: string): Promise<ObjectInfo> {
   return (
-    await axios.get<ObjectData>(
-      baseURL + "/objects/" + objectIndex
-    )
+    await axios.get<ObjectInfo>(baseURL + "/objects/" + id)
   ).data;
 }

@@ -1,9 +1,8 @@
 <template>
   <div class="container">
-    <h4 class="text-center mt-3">MSE 12 Ecology</h4>
-    <h5 class="text-center">
+    <h4 class="text-center">
       Сервис обработки спутниковых карт и поиска объектов
-    </h5>
+    </h4>
 
     <div id="accordion" class="accordion mt-2">
       <div class="accordion-item">
@@ -79,12 +78,13 @@
             data-bs-toggle="collapse"
             data-bs-target="#map-view"
           >
-            Просмотр карты
+            Глобальная карта
           </button>
         </h2>
         <div id="map-view" class="accordion-collapse collapse">
           <div class="accordion-body">
-            В режиме просмотра карты можно выбирать слои для отображения: слой
+            В режиме глобальной карты отображаются все карты, загруженные в систему
+             можно выбирать слои для отображения: слой
             изображения самого снимка, и слой найденных объектов. Данные слои
             накладываются поверх стандартной карты OpenStreetMap.
           </div>
@@ -127,8 +127,7 @@
           <div class="accordion-body">
             В режиме просмотра объекта можно посмотреть все параметры найденного
             объекта, отметить его на карте с помощью клавиши "Показать на
-            карте", а так же открыть отчет изображения, на котором был найден
-            объект.
+            карте".
           </div>
         </div>
       </div>

@@ -29,22 +29,20 @@ const router = useRouter();
 
 const columnDefs: ColDef<ObjectInfo>[] = [
   { headerName: "Id", field: "id", flex: 2, minWidth: 120 },
-  { headerName: "Название", field: "name", flex: 4, minWidth: 180 },
-  { headerName: "Индекс", field: "objectIndex", flex: 4, minWidth: 180 },
-  { headerName: "Площадь", field: "area", flex: 4, minWidth: 120 },
+  { headerName: "Тип", field: "type", flex: 4, minWidth: 80 },
+  { headerName: "Название", field: "name", flex: 4, minWidth: 80 },
   {
     headerName: "Дата загрузки",
-    field: "uploadDate",
+    field: "updateDatetime",
     flex: 5,
-    valueFormatter: dateFormatter,
     minWidth: 200,
+    valueFormatter: dateFormatter,
   },
   {
-    headerName: "Дата обнаружения",
-    field: "detectDate",
+    headerName: "Id загрузившего пользователя",
+    field: "updateUserId",
     flex: 5,
-    valueFormatter: dateFormatter,
-    minWidth: 200,
+    minWidth: 100,
   },
   {
     ...getActionsColDef([
@@ -55,11 +53,7 @@ const columnDefs: ColDef<ObjectInfo>[] = [
         onClicked: (action, data) =>
           router.push({
             name: routeNames.Object,
-            params: {
-              id: data.id,
-              name: data.name,
-              objectIndex: data.objectIndex,
-            },
+            params: { id: data.id },
           }),
       },
     ]),

@@ -1,6 +1,6 @@
 <template>
   <Suspense>
-    <ObjectComponent :id="id" :name="name" :object-index="objectIndex" />
+    <ObjectComponent :id="id" />
     <template #fallback>
       <LoadingSpinner />
     </template>
@@ -10,7 +10,7 @@
 <script setup lang="ts">
 import ObjectComponent from "@/components/routes/object/ObjectComponent.vue";
 import LoadingSpinner from "@/components/common/LoadingSpinner.vue";
-defineProps<{ id: string; name: string; objectIndex: string }>();
+defineProps<{ id: string }>();
 </script>
 
 <style scoped lang="scss"></style>

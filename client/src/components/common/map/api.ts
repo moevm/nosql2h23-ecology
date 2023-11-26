@@ -1,9 +1,10 @@
 import axios from "axios";
+import { Ref } from "vue";
 import L, { LatLngBounds, LatLngExpression, Polygon } from "leaflet";
 
 import { baseURL, map_zoom } from "@/api";
 import { MapInfo } from "@/types/maps";
-import { ObjectsMapData } from "@/types/objects";
+import { ObjectInfo } from "@/types/objects";
 
 
 export async function getMaps(
@@ -12,7 +13,7 @@ export async function getMaps(
   r: number
 ): Promise<MapInfo[] | void> {
   return (
-    await axios.get<MapInfo[]>(baseURL + "/images/near/" + y + "/" + x + "/" + r)
+    await axios.get<MapInfo[]>(baseURL + "/maps/near/" + y + "/" + x + "/" + r)
   ).data;
 }
 
@@ -21,9 +22,9 @@ export async function getObjects(
   y: number,
   x: number,
   r: number
-): Promise<ObjectsMapData[] | void> {
+): Promise<ObjectInfo[]> {
   return (
-    await axios.get<ObjectsMapData[]>(baseURL + "/objects/near/" + y + "/" + x + "/" + r)
+    await axios.get<ObjectInfo[]>(baseURL + "/objects/near/" + y + "/" + x + "/" + r)
   ).data;
 }
 
@@ -62,7 +63,7 @@ export function addMaps(
   for (let i = 0; i < imagesList.length; i++) {
     // Overlay layers (TMS).
     const lyr: L.Layer = L.tileLayer(
-      baseURL + "/images/tile/" + imagesList[i].id + "/{z}/{x}/{y}",
+      baseURL + "/tiles/" + imagesList[i].id + "/{z}/{x}/{y}",
       { tms: true, opacity: 1, attribution: "" }
     );
 
@@ -75,12 +76,12 @@ export function addMaps(
 
 export function addObjects(
   mapAndControl: { map: L.Map; controlLayer: L.Control.Layers, osmLayer: L.Layer },
-  objectsList: ObjectsMapData[]
+  objectsList: ObjectInfo[]
 ) {
   for (let i = 0; i < objectsList.length; i++) {
     // Object Polygon Layer.
     const objectPolygon: Polygon = L.polygon(
-      objectsList[i].polygons as LatLngExpression[],
+      objectsList[i].coordinates as LatLngExpression[],
       { color: objectsList[i].color, fillOpacity: 0.4 }
     );
     const objectPolygonLayer: L.LayerGroup = L.layerGroup([objectPolygon]);
@@ -102,15 +103,16 @@ export function addObjects(
 export async function updateViewMapsAnsObjects(
   mapAndControl: { map: L.Map; controlLayer: L.Control.Layers, osmLayer: L.Layer },
   imagesList: MapInfo[] | void,
-  objectsList: ObjectsMapData[] | void,
-  oldPos: {center: L.LatLng, zoom: number, layersDeleted: boolean}
+  objectsList: Ref<ObjectInfo[]>,
+  oldPos: {center: L.LatLng, zoom: number, layersDeleted: boolean},
+  emit: any
 ) {
   let newCenterCoords = mapAndControl.map.getBounds().getCenter();
   let newZoom = mapAndControl.map.getZoom();
 
   if (oldPos.layersDeleted || (oldPos.zoom > newZoom) ||
-      ((Math.abs(oldPos.center["lng"] - newCenterCoords["lng"]) >= getMapSide(mapAndControl.map)) ||
-      (Math.abs(oldPos.center["lat"] - newCenterCoords["lat"]) >= getMapSide(mapAndControl.map)))) {
+      ((oldPos.center.distanceTo(newCenterCoords) >= getMapSide(mapAndControl.map)) ||
+      (oldPos.center.distanceTo(newCenterCoords) >= getMapSide(mapAndControl.map)))) {
         
     oldPos.center = newCenterCoords;
     oldPos.zoom = newZoom;
@@ -129,14 +131,15 @@ export async function updateViewMapsAnsObjects(
       mapAndControl.map.getBounds().getCenter()["lng"], 
       getMapSide(mapAndControl.map)
     );
-    objectsList = await getObjects(
+    objectsList.value = await getObjects(
       mapAndControl.map.getBounds().getCenter()["lat"],
       mapAndControl.map.getBounds().getCenter()["lng"], 
       getMapSide(mapAndControl.map)
     );
+    emit("objects-updated");
     // Добавляем объекты и карты в пределах видимости.
     if (objectsList) {
-      addObjects(mapAndControl, objectsList);
+      addObjects(mapAndControl, objectsList.value);
       oldPos.layersDeleted = false;
     }
     if (imagesList) {
@@ -148,6 +151,8 @@ export async function updateViewMapsAnsObjects(
 
 
 export function getMapSide(map: L.Map) {
-  let mapSide = Math.abs(map.getBounds().getCenter()["lng"] - map.getBounds().getEast());
-  return mapSide > 2.5 ? mapSide : 2.5;
+  let center = map.getBounds().getCenter();
+  let centerEast = L.latLng(center["lat"], map.getBounds().getEast());
+  let meters = center.distanceTo(centerEast);
+  return meters > 12000 ? meters : 12000;
 }
