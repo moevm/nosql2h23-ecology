@@ -97,7 +97,7 @@ class ImageFinder(Resource):
 @api.route('/image/<string:img_id>')
 class Image(Resource):
     def delete(self, img_id):
-        map_info = db.maps.files.find_one(ObjectId(v))
+        map_info = db.maps.files.find_one(ObjectId(img_id))
 
         if map_info:
             maps_fs.delete(ObjectId(img_id))
