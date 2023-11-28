@@ -23,3 +23,14 @@ from .websocket.queue import send_queue
 scheduler = BackgroundScheduler()
 scheduler.add_job(send_queue, 'interval', seconds=1)
 scheduler.start()
+
+from .dev import get_admin, get_test_user
+
+
+def add_init_users():
+    get_admin()
+    get_test_user()
+
+
+with app.app_context():
+    add_init_users()
