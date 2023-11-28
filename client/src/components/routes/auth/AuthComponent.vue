@@ -40,7 +40,7 @@ const login = ref(""),
 
 async function doLogin() {
   try {
-    await userStore.login(login.value, login.password);
+    await userStore.login(login.value, password.value);
     toaster.addToast({
       title: "Выполнено",
       body: "Вы вошли в аккаунт",
