@@ -5,6 +5,7 @@ from werkzeug.local import LocalProxy
 from flask import current_app as app
 from app.auth.User import User
 from app.db import get_db
+from app.dev import get_admin
 from app.services.user import get_user_by_id
 from app.utils import parse_json
 
@@ -48,14 +49,6 @@ class Login(Resource):
 @api.route('/login/dev')
 class Login(Resource):
     def get(self):
-        admin = db.users.find_one({"login": app.config.get('INIT_ADMIN_LOGIN')})
-        if not admin:
-            result = db.users.insert_one({
-                'login': app.config.get('INIT_ADMIN_LOGIN'),
-                'password': app.config.get('INIT_ADMIN_PASSWORD'),
-                'name': 'root',
-                'role': 'admin'
-            })
-            admin = db.users.find_one(result.inserted_id)
+        admin = get_admin()
         login_user(User(admin), remember=True)
         return parse_json(get_user_by_id(current_user.get_id()))

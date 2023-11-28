@@ -39,12 +39,23 @@ const login = ref(""),
   password = ref("");
 
 async function doLogin() {
-  // await devLogin();
-  toaster.addToast({
-    title: "Выполнено",
-    body: "Вы вошли в аккаунт",
-    type: ToastTypes.primary,
-  });
+  try {
+    await userStore.login(login.value, password.value);
+    toaster.addToast({
+      title: "Выполнено",
+      body: "Вы вошли в аккаунт",
+      type: ToastTypes.primary,
+    });
+    router.push({ name: routeNames.Home });
+  }
+  catch (err) {
+    toaster.addToast({
+      title: "Ошибка",
+      body: "Неверные данные",
+      type: ToastTypes.danger,
+    });
+  }
+
 }
 
 async function devLogin() {
