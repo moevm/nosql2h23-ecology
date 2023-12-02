@@ -1,3 +1,5 @@
+import { UserRole } from "@/config/users";
+
 export interface User {
   _id: {
     $oid: string;
@@ -5,5 +7,5 @@ export interface User {
   login: string;
   password: string;
   name: string;
-  role: string;
+  role: UserRole;
 }
