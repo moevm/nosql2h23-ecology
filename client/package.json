@@ -11,8 +11,8 @@
     "lint": "eslint --fix 'src/**/*.ts' 'src/**/*.vue'"
   },
   "dependencies": {
-    "@formkit/themes": "^1.0.0-beta.15",
-    "@formkit/vue": "^1.0.0-beta.15",
+    "@formkit/themes": "^1.0.0",
+    "@formkit/vue": "^1.0.0",
     "@popperjs/core": "^2.11.6",
     "@vueuse/core": "^9.13.0",
     "ag-grid-community": "^29.1.0",
