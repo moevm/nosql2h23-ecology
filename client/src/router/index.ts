@@ -10,6 +10,7 @@ export const routeNames = {
   Home: "Home",
   Auth: "Auth",
   Users: "Users",
+  Profile: "Profile",
 };
 
 export const routePaths = {
@@ -21,7 +22,8 @@ export const routePaths = {
   [routeNames.Object]: "/object/:id",
   [routeNames.Home]: "/home",
   [routeNames.Auth]: "/auth",
-  [routeNames.Auth]: "/Users",
+  [routeNames.Users]: "/users",
+  [routeNames.Profile]: "/profile",
 };
 
 export const routes: RouteRecordRaw[] = [
@@ -59,7 +61,7 @@ export const routes: RouteRecordRaw[] = [
     path: routePaths[routeNames.Object],
     component: () => import("@/views/ObjectView.vue"),
     props: (route) => ({
-      id: route.params.id
+      id: route.params.id,
     }),
   },
   {
@@ -78,6 +80,12 @@ export const routes: RouteRecordRaw[] = [
     name: routeNames.Users,
     path: routePaths[routeNames.Users],
     component: () => import("@/views/UsersView.vue"),
+  },
+
+  {
+    name: routeNames.Profile,
+    path: routePaths[routeNames.Profile],
+    component: () => import("@/views/ProfileView.vue"),
   },
 ];
 

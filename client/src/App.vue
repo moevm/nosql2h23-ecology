@@ -12,7 +12,7 @@
       >
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div id="navbar" class="collapse navbar-collapse fs-5">
+      <div id="navbar" class="collapse navbar-collapse fs-6">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li v-for="route of routes" :key="route" class="nav-item ps-4">
             <router-link
@@ -84,7 +84,7 @@ const routes = computed(() => [
   routeNames.MapsList,
   routeNames.Queue,
   routeNames.ObjectsList,
-  ...(userStore.isAuthed ? [routeNames.Upload] : []),
+  ...(userStore.isAuthed ? [routeNames.Upload, routeNames.Profile] : []),
 ]);
 const routesTranslation = {
   [routeNames.Map]: "Глобальная карта",
@@ -92,6 +92,7 @@ const routesTranslation = {
   [routeNames.Queue]: "Очередь",
   [routeNames.ObjectsList]: "Объекты",
   [routeNames.Upload]: "Загрузить",
+  [routeNames.Profile]: "Профиль",
 };
 
 async function logout() {
