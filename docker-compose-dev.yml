@@ -19,7 +19,7 @@ services:
     build:
       context: worker
     entrypoint: celery
-    command: -A app worker -Q image_process,dev --loglevel=ERROR -c 4
+    command: -A app worker -Q image_process,dev -c 4
     depends_on:
       - redis
       - mongo
@@ -32,13 +32,15 @@ services:
     build:
       context: worker
     entrypoint: celery
-    command: -A app worker -Q slice --loglevel=ERROR -c 2
+    command: -A app worker -Q slice -c 2
     depends_on:
       - redis
       - mongo
     environment:
       MONGO_URI: "mongodb://mongo:27017/db"
       REDIS_URI: "redis://redis:6379/0"
+      MIN_ZOOM: 1
+      MAX_ZOOM: 15
       
   server:
     container_name: server
@@ -69,6 +71,8 @@ services:
     environment:
       CLIENT_SERVER_URL: 'localhost'
       CLIENT_SERVER_PORT: '5000'
+      MIN_ZOOM: 1
+      MAX_ZOOM: 15
 
   reverse-proxy:
     container_name: reverse-proxy
