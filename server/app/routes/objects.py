@@ -1,3 +1,4 @@
+from flask import request
 from flask_restx import Namespace, Resource
 from redis.client import StrictRedis
 from werkzeug.local import LocalProxy
@@ -80,3 +81,45 @@ class ObjectsNear(Resource):
                 "center": [map_object["center"][1], map_object["center"][0]],
             })
         return objects
+
+
+@api.route('/update')
+class ObjectsUpdate(Resource):
+    def post(self):
+        json = request.get_json()
+        edited_obj = json['edited']
+        created_obj = json['created']
+        deleted_obj = json['deleted']
+
+        # Переформируем полученные словари:
+        edited_obj_id = []
+        deleted_obj_id = []
+        for obj_dict in [edited_obj, created_obj, deleted_obj]:
+            for obj in obj_dict:
+                if obj_dict == edited_obj:
+                    edited_obj_id.append(ObjectId(obj["id"]))
+                elif obj_dict == deleted_obj:
+                    deleted_obj_id.append(ObjectId(obj["id"]))
+                # Заменяем id на _id
+                if "id" in obj:
+                    obj["_id"] = ObjectId(obj["id"])
+                    obj.pop("id")
+                # updateUserId и updateDatetime на update: {user_id, datetime}
+                obj["update"] = {"user_id": obj["updateUserId"], "datetime": obj["updateDatetime"]}
+                obj.pop("updateUserId")
+                obj.pop("updateDatetime")
+
+        # Добавляем объекты, добавленные пользователем.
+        if created_obj:
+            db.objects.insert_many(created_obj)
+
+        # Изменяем объекты, измененные пользователем.
+        if edited_obj:
+            db.objects.delete_many({"_id": {"$in": edited_obj_id}})
+            db.objects.insert_many(edited_obj)
+        
+        # Удаляем объекты, удаленные пользователем.
+        if deleted_obj:
+            db.objects.delete_many({"_id": {"$in": deleted_obj_id}})
+
+        return "Ok"

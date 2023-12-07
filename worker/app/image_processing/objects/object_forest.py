@@ -14,7 +14,7 @@ class ObjectForest(ObjectBase):
     def __init__(self, img_id, image_bytes):
         super().__init__(img_id, image_bytes)
         
-        self.name = 'Forest'
+        self.name = 'Лес'
         self.color = 'green'
     
     def find_contours_of_object(self):
