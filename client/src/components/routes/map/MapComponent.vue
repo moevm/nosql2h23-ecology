@@ -1,7 +1,7 @@
 <template>
   <div class="container-lg">
     <div class="row justify-content-between">
-      <h3 class="col">Объекты</h3>
+      <h3 class="col">Сохраненные объекты</h3>
     </div>
     <AgGridVue
       class="ag-theme-alpine mt-3"
@@ -20,7 +20,7 @@
 import { ref } from "vue";
 import { AgGridVue } from "ag-grid-vue3";
 import { ColDef, GridOptions } from "ag-grid-community";
-import { ObjectInfo } from "@/types/objects";
+import { dateFormatter } from "@/ag-grid/formatters";
 import {
   fitActionsColumn,
   getActionsColDef,
@@ -31,13 +31,11 @@ import { useRouter } from "vue-router";
 import L from "leaflet";
 
 import MapDisplay from "@/components/common/map/MapDisplay.vue";
+import { ObjectInfo } from "@/types/objects";
 
 
 const router = useRouter();
-const props = defineProps<{
-  x?: number;
-  y?: number;
-}>();
+const props = defineProps<{ x?: number; y?: number; }>();
 const mapDisplay = ref<InstanceType<typeof MapDisplay>>();
 let lastMarker: L.Marker | undefined = undefined;
 
@@ -62,6 +60,7 @@ const columnDefs: ColDef<ObjectInfo>[] = [
     field: "updateDatetime",
     flex: 5,
     minWidth: 180,
+    valueFormatter: dateFormatter
   },
   {
     headerName: "Id загрузившего пользователя",
