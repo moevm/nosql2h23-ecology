@@ -1,4 +1,5 @@
 from flask import request
+from flask_login import login_required
 from flask_restx import Namespace, Resource
 from redis.client import StrictRedis
 from werkzeug.local import LocalProxy
@@ -6,6 +7,7 @@ from bson.objectid import ObjectId
 import json
 
 from app.db import get_db, get_tiles, get_maps, get_redis
+from app.utils import parse_json
 
 db = LocalProxy(get_db)
 tiles_fs = LocalProxy(get_tiles)
@@ -118,7 +120,7 @@ class ObjectsUpdate(Resource):
         if edited_obj:
             db.objects.delete_many({"_id": {"$in": edited_obj_id}})
             db.objects.insert_many(edited_obj)
-        
+
         # Удаляем объекты, удаленные пользователем.
         if deleted_obj:
             db.objects.delete_many({"_id": {"$in": deleted_obj_id}})
@@ -129,8 +131,9 @@ class ObjectsUpdate(Resource):
 @api.route('/impex')
 class ObjectsImpex(Resource):
     def get(self):
-        return db.objects.find({})
+        return parse_json(db.objects.find({}))
 
+    @login_required
     def post(self):
         new_objects = json.load(request.files['objects'])
         object_keys = ["_id", "type", "name", "color", "update", "coordinates", "center"]
@@ -138,6 +141,6 @@ class ObjectsImpex(Resource):
             for k in object_keys:
                 if k not in obj:
                     return "Not ok"
+            del obj['_id']
         db.objects.insert_many(new_objects)
         return "Ok"
-
