@@ -112,6 +112,8 @@ onMounted(() => {
       chosenObjType, chosenObjName, userId, toaster, updateViewMapsAnsObjects
     );
   }
+  
+  updateViewMapsAnsObjects();
 
   // Задаем интервал на обновление отображаемых объектов.
   timer = setInterval(() => {

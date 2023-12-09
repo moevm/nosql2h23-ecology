@@ -15,7 +15,7 @@ export const api: AxiosInstance = axios.create({
 });
 
 const min_map_zoom = import.meta.env.MIN_ZOOM ?? 1;
-const max_map_zoom = import.meta.env.MAX_ZOOM ?? 15;
+const max_map_zoom = import.meta.env.MAX_ZOOM ?? 17;
 
 export const map_zoom = [min_map_zoom, max_map_zoom];
 

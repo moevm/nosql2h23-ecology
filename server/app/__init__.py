@@ -24,7 +24,7 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(send_queue, 'interval', seconds=1)
 scheduler.start()
 
-from .dev import get_admin, get_test_user
+from .dev import get_admin, get_test_user, add_test_data
 
 
 def add_init_users():
@@ -34,3 +34,4 @@ def add_init_users():
 
 with app.app_context():
     add_init_users()
+    add_test_data()
