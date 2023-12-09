@@ -36,7 +36,7 @@ services:
       MONGO_URI: "mongodb://mongo:27017/db"
       REDIS_URI: "redis://redis:6379/0"
       MIN_ZOOM: 1
-      MAX_ZOOM: 15
+      MAX_ZOOM: 17
       
   server:
     container_name: server
@@ -55,6 +55,8 @@ services:
       - celery-slice
       - redis
       - mongo
+    volumes:
+      - ./worker/map_samples:/map_samples
 
   client:
     container_name: client
@@ -67,7 +69,7 @@ services:
       CLIENT_SERVER_URL: 'localhost'
       CLIENT_SERVER_PORT: '5000'
       MIN_ZOOM: 1
-      MAX_ZOOM: 15
+      MAX_ZOOM: 17
 
   reverse-proxy:
     container_name: reverse-proxy
