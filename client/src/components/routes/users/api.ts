@@ -3,11 +3,11 @@ import { User } from "@/types/users";
 import { UserCreation } from "@/components/routes/users/types";
 
 function getUsers() {
-  return api.get<User[]>("/users");
+  return api.get<User[]>("/users/");
 }
 
 function createUser(user: UserCreation) {
-  return api.post("/users", user);
+  return api.post<string>("/users/", user);
 }
 
 function deleteUser(id: string) {

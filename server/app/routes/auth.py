@@ -36,9 +36,11 @@ class Login(Resource):
             login_user(User(user), remember=True)
             return parse_json(get_user_by_id(current_user.get_id())), 200
 
-    @login_required
     def get(self):
-        return parse_json(get_user_by_id(current_user.get_id()))
+        if current_user.is_authenticated:
+            return parse_json(get_user_by_id(current_user.get_id()))
+        else:
+            return None
 
     @login_required
     def delete(self):

@@ -27,6 +27,8 @@ const props = withDefaults(
   { backdrop: true }
 );
 
+const emit = defineEmits<{ (e: "opened"): void; (e: "closed"): void }>();
+
 const modalEl = ref<HTMLDivElement | null>(null),
   modal = ref<bootstrap.Modal | null>(null);
 
@@ -39,10 +41,12 @@ onMounted(() => {
 
 function open() {
   modal.value?.show();
+  emit("opened");
 }
 
 function close() {
   modal.value?.hide();
+  emit("closed");
 }
 
 defineExpose({ open, close, modal: readonly(modal) });
