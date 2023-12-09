@@ -59,3 +59,9 @@ api.interceptors.response.use(
     throw error;
   }
 );
+
+export const objectTypesColors: Map<string, string> = new Map();
+objectTypesColors.set("Лес", "green");
+objectTypesColors.set("Вырубка", "red");
+objectTypesColors.set("Поляна", "aquamarine");
+objectTypesColors.set("Дом", "darkgrey");
