@@ -73,7 +73,7 @@ def connected_components(threshold, connectivity=8):
     return mask
 
 
-def find_contours(thresh, approx_eps = 0.001):
+def find_contours(thresh, approx_eps = 0.005):
      # Find the contours in the input image
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_TC89_L1)
     # Аппроксимируем контур, чтобы уменьшить число точек.
