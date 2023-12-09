@@ -3,6 +3,7 @@ from flask_restx import Namespace, Resource
 from redis.client import StrictRedis
 from werkzeug.local import LocalProxy
 from bson.objectid import ObjectId
+import json
 
 from app.db import get_db, get_tiles, get_maps, get_redis
 
@@ -123,3 +124,12 @@ class ObjectsUpdate(Resource):
             db.objects.delete_many({"_id": {"$in": deleted_obj_id}})
 
         return "Ok"
+
+
+@api.route('/impex')
+class ObjectsImpex(Resource):
+    def get(self):
+        return db.objects.find({})
+
+
+
