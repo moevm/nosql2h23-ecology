@@ -15,7 +15,7 @@ class ObjectDeforestation(ObjectBase):
     def __init__(self, img_id, image_bytes):
         super().__init__(img_id, image_bytes)
         
-        self.name = 'Deforestaion'
+        self.name = 'Вырубка'
         self.color = 'red'
     
     def find_contours_of_object(self):

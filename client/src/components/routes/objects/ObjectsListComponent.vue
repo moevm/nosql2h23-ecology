@@ -19,11 +19,12 @@ import {
   getActionsColDef,
   getDefaultGridOptions,
 } from "@/ag-grid/factory";
-import { ObjectInfo } from "@/types/objects";
-import { getObjectsInfo } from "@/components/routes/objects/api";
 import { dateFormatter } from "@/ag-grid/formatters";
 import { routeNames } from "@/router";
 import { useRouter } from "vue-router";
+
+import { ObjectInfo } from "@/types/objects";
+import { getObjectsInfo } from "@/components/routes/objects/api";
 
 const router = useRouter();
 

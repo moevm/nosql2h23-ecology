@@ -15,3 +15,9 @@ const min_map_zoom = import.meta.env.MIN_ZOOM ?? 1;
 const max_map_zoom = import.meta.env.MAX_ZOOM ?? 15;
 
 export const map_zoom = [min_map_zoom, max_map_zoom];
+
+export const objectTypesColors: Map<string, string> = new Map();
+objectTypesColors.set("Лес", "green");
+objectTypesColors.set("Вырубка", "red");
+objectTypesColors.set("Поляна", "aquamarine");
+objectTypesColors.set("Дом", "darkgrey");
