@@ -131,5 +131,9 @@ class ObjectsImpex(Resource):
     def get(self):
         return db.objects.find({})
 
+    def post(self):
+        new_objects = json.load(request.files['objects'])
 
+        db.objects.insert_many(new_objects)
+        return "Ok"
 
