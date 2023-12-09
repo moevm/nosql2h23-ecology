@@ -63,6 +63,11 @@
   </nav>
   <main>
     <router-view />
+    <LoadingBottomCard
+      v-if="loadingStore.showProgress"
+      :processed="loadingStore.processed"
+      :enqueued="loadingStore.enqueued"
+    />
   </main>
   <ToasterComponent />
 </template>
@@ -75,9 +80,12 @@ import { useToaster } from "@/store/toaster";
 import { ToastTypes } from "@/config/toast";
 import { UserRole } from "@/config/users";
 import { computed } from "vue";
+import LoadingBottomCard from "@/components/common/LoadingBottomCard.vue";
+import { useLoadingStore } from "@/store/loading";
 
 const userStore = useUserStore(),
-  toaster = useToaster();
+  toaster = useToaster(),
+  loadingStore = useLoadingStore();
 
 const routes = computed(() => [
   routeNames.Map,

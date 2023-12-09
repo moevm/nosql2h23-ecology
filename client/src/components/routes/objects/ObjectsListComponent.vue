@@ -1,6 +1,9 @@
 <template>
   <div class="container-lg mt-3">
     <h3>База объектов</h3>
+    <div class="text-end mb-2" @click="exportData">
+      <button class="btn btn-primary">Экспорт</button>
+    </div>
     <AgGridVue
       class="ag-theme-alpine"
       :column-defs="columnDefs"
@@ -24,7 +27,8 @@ import { routeNames } from "@/router";
 import { useRouter } from "vue-router";
 
 import { ObjectInfo } from "@/types/objects";
-import { getObjectsInfo } from "@/components/routes/objects/api";
+import { exportObjects, getObjectsInfo } from "@/components/routes/objects/api";
+import { saveAs } from "file-saver";
 
 const router = useRouter();
 
@@ -67,6 +71,14 @@ const options: GridOptions<ObjectInfo> = {
 };
 
 const data = await getObjectsInfo();
+
+async function exportData() {
+  const data = (await exportObjects()).data;
+  const blob = new Blob([JSON.stringify(data)], {
+    type: "text/plain;charset=utf-8",
+  });
+  saveAs(blob, "objects.json");
+}
 </script>
 
 <style scoped lang="scss"></style>
