@@ -1,4 +1,4 @@
-from flask_login import login_required
+from flask_login import login_required, current_user
 from flask_restx import Namespace, Resource, fields
 from werkzeug.local import LocalProxy
 
@@ -59,7 +59,7 @@ class UserResource(Resource):
     @login_required
     @role_require('admin')
     def get(self, id):
-        return get_user_by_id(id)
+        return parse_json(get_user_by_id(id))
 
     @login_required
     @role_require('admin')
@@ -82,3 +82,25 @@ class UserResource(Resource):
     @login_required
     def get(self, login):
         return parse_json(find_user(login))
+
+
+# Тело для обновления пользователя самим собой
+self_put_parser = api.parser(
+).add_argument(
+    "login", type=str, required=False
+).add_argument(
+    "password", type=str, required=False
+).add_argument(
+    "name", type=str, required=False
+)
+
+
+@api.route('/user/self')
+class UserResource(Resource):
+    @login_required
+    @api.doc(parser=self_put_parser)
+    def put(self):
+        args = user_put_parser.parse_args()
+        args = dict((k, v) for k, v in args.items() if v is not None)
+        update_user(current_user.get_id(), args)
+        return 'Updated'

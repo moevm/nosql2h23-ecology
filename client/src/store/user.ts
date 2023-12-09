@@ -31,7 +31,7 @@ export const useUserStore = defineStore("user", () => {
   const role = computed(() => user.value?.role || null);
 
   return {
-    user: readonly(user),
+    user,
     fetchUser,
     login,
     logout,
