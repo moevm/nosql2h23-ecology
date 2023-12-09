@@ -63,7 +63,6 @@ import {
   getActionsColDef,
   getDefaultGridOptions,
 } from "@/ag-grid/factory";
-import { MapInfo } from "@/types/maps";
 import { nextTick, onBeforeMount, ref } from "vue";
 import { User } from "@/types/users";
 import { UserAdminAPI } from "@/components/routes/users/api";
@@ -138,7 +137,7 @@ const columnDefs: ColDef<User>[] = [
   },
 ];
 
-const options: GridOptions<MapInfo> = {
+const options: GridOptions = {
   ...getDefaultGridOptions(),
   domLayout: "autoHeight",
   animateRows: true,
@@ -151,7 +150,7 @@ function showAddModal() {
 
 async function onAdd(user: User) {
   const id = (await UserAdminAPI.createUser(_.omit(user, "_id"))).data;
-  users.value.unshift({ ...user, _id: { $oid: id } });
+  users.value = [{ ...user, _id: { $oid: id } }, ...users.value];
 }
 
 async function onRemove() {
@@ -166,11 +165,8 @@ async function onRemove() {
 
 async function onEdit(user: User) {
   await UserAdminAPI.updateUser(user._id.$oid, _.omit(user, "_id"));
-  users.value.splice(
-    users.value.findIndex((u) => u._id.$oid === user._id.$oid),
-    1,
-    user
-  );
+  _.assign(selected.value, user);
+  options.api?.refreshCells();
 }
 </script>
 
