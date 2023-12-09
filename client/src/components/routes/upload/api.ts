@@ -6,3 +6,9 @@ export function uploadMap(file: File, name: string) {
   formData.append("name", name);
   return api.post("/images/", formData);
 }
+
+export function uploadObjects(file: File) {
+  const formData = new FormData();
+  formData.append("objects", file);
+  return api.post("/objects/impex", formData);
+}
