@@ -104,3 +104,22 @@ class UserResource(Resource):
         args = dict((k, v) for k, v in args.items() if v is not None)
         update_user(current_user.get_id(), args)
         return 'Updated'
+
+@api.route('/impex')
+class UserResource(Resource):
+    def get(self):
+        return parse_json(db.users.find({}))
+
+    @login_required
+    def post(self):
+        new_users = json.load(request.files['users'])
+        users_keys = ["_id", "login", "passwod", "name", "state"] # Has user got property "role" ?
+        for user in new_users:
+            if db.users.find_one({"login": user["login"]}):
+                return f"User with login {user["login"]} already exists"
+            for k in users_keys:
+                if k not in user:
+                    return "Not ok"
+            del user['_id']
+        db.users.insert_many(new_users)
+        return "OK"
