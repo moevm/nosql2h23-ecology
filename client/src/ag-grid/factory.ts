@@ -66,7 +66,7 @@ export function getActionsColDef<T>(actions: Action<T>[]): ColDef<T> {
     },
     sortable: false,
     filter: false,
-    resizable: false,
+    resizable: true,
     pinned: "right",
     suppressMovable: true,
   };

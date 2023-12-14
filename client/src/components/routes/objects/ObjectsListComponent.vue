@@ -9,6 +9,7 @@
       :column-defs="columnDefs"
       :grid-options="options"
       @grid-ready="onGridReady"
+      @first-data-rendered="fitActionsColumn"
     />
   </div>
 </template>
@@ -76,7 +77,6 @@ const options: GridOptions<ObjectInfo> = {
 };
 
 function onGridReady(params: GridReadyEvent) {
-  fitActionsColumn({ "columnApi": params.columnApi });
   params.api.setDatasource(new DataSource("/objects/table"));
 }
 

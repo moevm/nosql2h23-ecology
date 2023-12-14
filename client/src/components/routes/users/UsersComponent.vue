@@ -13,6 +13,7 @@
       :row-data="users"
       :grid-options="options"
       @grid-ready="onGridReady"
+      @first-data-rendered="fitActionsColumn"
     />
 
     <UserDataModal
@@ -144,7 +145,6 @@ const options: GridOptions = {
 };
 
 function onGridReady(params: GridReadyEvent) {
-  fitActionsColumn({ "columnApi": params.columnApi });
   params.api.setDatasource(new DataSource("/users/table"));
 }
 

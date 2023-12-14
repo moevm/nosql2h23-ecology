@@ -6,6 +6,7 @@
       :column-defs="columnDefs"
       :grid-options="options"
       @grid-ready="onGridReady"
+      @first-data-rendered="fitActionsColumn"
     />
   </div>
 
@@ -79,14 +80,14 @@ const columnDefs: ColDef<MapInfo>[] = [
     headerName: "Обработано",
     field: "ready",
     flex: 3,
-    minWidth: 200,
+    minWidth: 100,
     cellRenderer: FlagRenderer,
   },
   {
     headerName: "Нарезано",
     field: "sliced",
     flex: 3,
-    minWidth: 200,
+    minWidth: 100,
     cellRenderer: FlagRenderer,
   },
   {
@@ -121,7 +122,6 @@ const options: GridOptions<MapInfo> = {
 
 
 function onGridReady(params: GridReadyEvent) {
-  fitActionsColumn({ "columnApi": params.columnApi });
   gridApi = params.api;
   gridApi.setDatasource(new DataSource("/images/table"));
 }

@@ -8,7 +8,7 @@
       :row-data="objectsInfo"
       :column-defs="columnDefs"
       :grid-options="options"
-      @grid-ready="fitActionsColumn"
+      @first-data-rendered="fitActionsColumn"
     />
     <div class="d-flex justify-content-center mt-3">
       <MapDisplay :x="x" :y="y" ref="mapDisplay" @objects-updated="objectsShow"/>
