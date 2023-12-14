@@ -40,16 +40,7 @@ const mapDisplay = ref<InstanceType<typeof MapDisplay>>();
 let lastMarker: L.Marker | undefined = undefined;
 
 // Надеюсь, никто не заметит этот костыль, чтобы прогружались action-ы сразу :)
-const objectsInfo = ref<ObjectInfo[]>([{
-  id: "-",
-  type: "-",
-  name: "-",
-  color: "-",
-  updateUserId: "-",
-  updateDatetime: "-",
-  center: [0, 0],
-  coordinates: [[0, 0]]
-}]);
+const objectsInfo = ref<ObjectInfo[]>([]);
 
 const columnDefs: ColDef<ObjectInfo>[] = [
   { headerName: "Id", field: "id", flex: 2, minWidth: 120 },

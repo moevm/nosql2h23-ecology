@@ -75,5 +75,5 @@ export function getActionsColDef<T>(actions: Action<T>[]): ColDef<T> {
 export let defaultPageSize = 10;
 
 export function fitActionsColumn({ columnApi }: { columnApi: ColumnApi }) {
-  columnApi.autoSizeColumn("actions", true);
+  columnApi.autoSizeColumn("actions", false);
 }
