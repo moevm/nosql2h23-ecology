@@ -39,7 +39,6 @@ def get_test_user():
 def add_test_data():
     test_file_path = "/map_samples/2.tif"
     if os.path.isfile(test_file_path) and not db.maps.files.count_documents({}):
-        print("it worked!", "\n/" * 30)
         file_id = maps_fs.put(
             open(test_file_path, "rb"), filename="2.tif",  chunk_size= 256 * 1024,
             name = "test_sample",
