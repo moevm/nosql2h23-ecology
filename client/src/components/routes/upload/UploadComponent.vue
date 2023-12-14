@@ -81,6 +81,11 @@ import { FormKitGroupValue, FormKitNode } from "@formkit/core";
 import { useToaster } from "@/store/toaster";
 import { ToastTypes } from "@/config/toast";
 import { computed, ref } from "vue";
+import { useUserStore } from "@/store/user";
+
+
+const userStore = useUserStore();
+const userId = userStore.user ? userStore.user._id.$oid : "undefined";
 
 const tiffRegExp = /.(tif|tiff)$/i;
 
@@ -107,7 +112,7 @@ async function submit(data: FormKitGroupValue) {
   try {
     await Promise.all(
       files.value.map((f) =>
-        uploadMap(f.file, (data[f.name] as string) ?? f.name)
+        uploadMap(f.file, userId, (data[f.name] as string) ?? f.name)
       )
     );
     toaster.addToast({
@@ -127,17 +132,17 @@ async function submit(data: FormKitGroupValue) {
 async function submitImport(data: FormKitGroupValue) {
   console.log(data);
   try {
-    await uploadObjects((data.files as { file: File }[])[0].file);
+    await uploadObjects((data.files as { file: File }[])[0].file, userId);
 
     toaster.addToast({
       title: "Информация",
-      body: "Карты загружены успешно",
+      body: "Объекты загружены успешно",
       type: ToastTypes.success,
     });
   } catch (e) {
     toaster.addToast({
       title: "Информация",
-      body: "Не удалось загрузить файлы",
+      body: "Не удалось загрузить объекты",
       type: ToastTypes.danger,
     });
   }
