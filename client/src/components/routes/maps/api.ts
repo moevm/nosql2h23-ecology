@@ -1,11 +1,6 @@
-import { MapInfo } from "@/types/maps";
-import axios from "axios";
-import { baseURL } from "@/api";
+import { api } from "@/api";
 
-export async function getMapsInfo(): Promise<MapInfo[]> {
-  return (await axios.get<MapInfo[]>(baseURL + "/images/")).data;
-}
 
 export function deleteMap(id: string) {
-  return axios.delete(baseURL + "/images/image/" + id);
+  return api.delete("/images/image/" + id);
 }

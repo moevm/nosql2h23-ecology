@@ -1,4 +1,3 @@
-import axios from "axios";
 import { Ref } from "vue";
 import L, { LatLngExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -6,7 +5,7 @@ import "@/components/common/map/customIcon.css";
 import "@geoman-io/leaflet-geoman-free";
 import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
 
-import { baseURL, map_zoom } from "@/api";
+import { baseURL, api, map_zoom } from "@/api";
 import { MapInfo } from "@/types/maps";
 import { ObjectInfo } from "@/types/objects";
 import { objectTypesColors } from "@/api";
@@ -19,7 +18,7 @@ export async function getMaps(
   r: number
 ): Promise<MapInfo[] | void> {
   return (
-    await axios.get<MapInfo[]>(baseURL + "/images/near/" + y + "/" + x + "/" + r)
+    await api.get<MapInfo[]>("/images/near/" + y + "/" + x + "/" + r)
   ).data;
 }
 
@@ -30,7 +29,7 @@ export async function getObjects(
   r: number
 ): Promise<ObjectInfo[]> {
   return (
-    await axios.get<ObjectInfo[]>(baseURL + "/objects/near/" + y + "/" + x + "/" + r)
+    await api.get<ObjectInfo[]>("/objects/near/" + y + "/" + x + "/" + r)
   ).data;
 }
 
@@ -460,7 +459,7 @@ function sendObjects(
   drawLayersList.deleted.forEach(listFormation(deleted));
 
   // Отправляем на сервер.
-  axios.post(baseURL + "/objects/update", {
+  api.post("/objects/update", {
     edited: edited,
     created: created,
     deleted: deleted

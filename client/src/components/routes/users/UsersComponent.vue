@@ -12,7 +12,7 @@
       :column-defs="columnDefs"
       :row-data="users"
       :grid-options="options"
-      @grid-ready="fitActionsColumn"
+      @grid-ready="onGridReady"
     />
 
     <UserDataModal
@@ -57,13 +57,17 @@
 
 <script setup lang="ts">
 import { AgGridVue } from "ag-grid-vue3";
-import { ColDef, GridOptions } from "ag-grid-community";
+import { nextTick, ref } from "vue";
+import _ from "lodash";
+import { ColDef, GridOptions, GridReadyEvent } from "ag-grid-community";
+
 import {
   fitActionsColumn,
   getActionsColDef,
-  getDefaultGridOptions,
+  getGridOptionsForSSDM,
+  getColDefFilterText
 } from "@/ag-grid/factory";
-import { nextTick, onBeforeMount, ref } from "vue";
+import { DataSource } from "@/ag-grid/datasource";
 import { User } from "@/types/users";
 import { UserAdminAPI } from "@/components/routes/users/api";
 import { useRouter } from "vue-router";
@@ -74,7 +78,7 @@ import { useToaster } from "@/store/toaster";
 import UserDataModal from "@/components/routes/users/UserDataModal.vue";
 import Modal from "@/components/common/Modal.vue";
 import { getEmptyUser } from "@/config/users";
-import _ from "lodash";
+
 
 const router = useRouter();
 
@@ -88,15 +92,11 @@ const userStore = useUserStore(),
 const users = ref<User[]>([]),
   selected = ref<User | null>(null);
 
-onBeforeMount(async () => {
-  users.value = (await UserAdminAPI.getUsers()).data;
-});
-
 const columnDefs: ColDef<User>[] = [
-  { headerName: "Id", field: "_id.$oid", flex: 2, minWidth: 80 },
-  { headerName: "Логин", field: "login", flex: 3, minWidth: 180 },
-  { headerName: "Имя", field: "name", flex: 3, minWidth: 100 },
-  { headerName: "Роль", field: "role", flex: 3, minWidth: 90 },
+  { headerName: "Id", field: "_id.$oid", flex: 2, minWidth: 80, ...getColDefFilterText() },
+  { headerName: "Логин", field: "login", flex: 3, minWidth: 180, ...getColDefFilterText() },
+  { headerName: "Имя", field: "name", flex: 3, minWidth: 100, ...getColDefFilterText() },
+  { headerName: "Роль", field: "role", flex: 3, minWidth: 90, ...getColDefFilterText() },
 
   {
     ...getActionsColDef([
@@ -138,10 +138,15 @@ const columnDefs: ColDef<User>[] = [
 ];
 
 const options: GridOptions = {
-  ...getDefaultGridOptions(),
+  ...getGridOptionsForSSDM(),
   domLayout: "autoHeight",
   animateRows: true,
 };
+
+function onGridReady(params: GridReadyEvent) {
+  fitActionsColumn({ "columnApi": params.columnApi });
+  params.api.setDatasource(new DataSource("/users/table"));
+}
 
 function showAddModal() {
   selected.value = getEmptyUser();
