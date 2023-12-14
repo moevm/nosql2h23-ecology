@@ -1,6 +1,5 @@
-import io
 import arrow
-from flask import jsonify, request, send_file, abort
+from flask import jsonify, request, make_response
 from flask_restx import Namespace, Resource
 from redis.client import StrictRedis
 from werkzeug.local import LocalProxy
@@ -10,6 +9,7 @@ from app import socketio
 from app.db import get_db, get_tiles, get_maps, get_redis
 from app.tasks import process_image
 from app.tasks import slice
+from app.services.pagination import format_pagination
 
 db = LocalProxy(get_db)
 tiles_fs = LocalProxy(get_tiles)
@@ -19,9 +19,9 @@ redis: StrictRedis = LocalProxy(get_redis)
 api = Namespace("images", description="Операции с изображениями")
 
 
-def get_images_list():
+def get_images_list(find_query={}, skip=0, limit=0):
     maps = []
-    for map in db.maps.files.find({}):
+    for map in db.maps.files.find(find_query).skip(skip).limit(limit):
         maps.append({
             "id": str(map["_id"]),
             "name": map["name"],
@@ -58,6 +58,27 @@ class ImagesList(Resource):
         process_image.delay(str(file_id))
 
         return jsonify({'message': 'Image added successfully'})
+    
+
+@api.route('/table/')
+class ImagesForTable(Resource):
+    def get(self):
+        args = request.args.to_dict()
+        format_pagination(args)
+
+        # Переименовываем некоторые поля, которые на сервере называются по-другому.
+
+
+        # Формируем запрос.
+        query = {}
+
+        # Получаем карты, которые подходят под все условия, заданные на клиенте.
+        data = get_images_list(query, args["start"], args["end"] - args["start"])
+       
+        return make_response(jsonify({
+            "rowData": data,
+            "end": args["start"] + len(data)
+        }) , 200)
 
 
 @api.route('/near/<string:y>/<string:x>/<string:r>')

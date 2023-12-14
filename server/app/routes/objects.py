@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, jsonify, make_response
 from flask_login import login_required
 from flask_restx import Namespace, Resource
 from redis.client import StrictRedis
@@ -8,6 +8,7 @@ import json
 
 from app.db import get_db, get_tiles, get_maps, get_redis
 from app.utils import parse_json
+from app.services.pagination import format_pagination
 
 db = LocalProxy(get_db)
 tiles_fs = LocalProxy(get_tiles)
@@ -17,23 +18,48 @@ redis: StrictRedis = LocalProxy(get_redis)
 api = Namespace("objects", description="Операции с объедками")
 
 
+def get_objects_list(find_query={}, skip=0, limit=0):
+    objects = []
+    for map_object in db.objects.find(find_query).skip(skip).limit(limit):
+        objects.append({
+            "id": str(map_object["_id"]),
+            "type": map_object["type"],
+            "name": map_object["name"],
+            "color": map_object["color"],
+            "updateUserId": map_object["update"]["user_id"],
+            "updateDatetime": map_object["update"]["datetime"],
+            "coordinates": map_object["coordinates"],
+            # Переворачиваем, чтобы получить [lat, lng] для leaflet
+            "center": [map_object["center"][1], map_object["center"][0]],
+        })
+    return objects
+
+
 @api.route('/')
 class ObjectsList(Resource):
     def get(self):
-        objects = []
-        for map_object in db.objects.find({}):
-            objects.append({
-                "id": str(map_object["_id"]),
-                "type": map_object["type"],
-                "name": map_object["name"],
-                "color": map_object["color"],
-                "updateUserId": map_object["update"]["user_id"],
-                "updateDatetime": map_object["update"]["datetime"],
-                "coordinates": map_object["coordinates"],
-                # Переворачиваем, чтобы получить [lat, lng] для leaflet
-                "center": [map_object["center"][1], map_object["center"][0]],
-            })
-        return objects
+        return get_objects_list()
+    
+
+@api.route('/table/')
+class ImagesForTable(Resource):
+    def get(self):
+        args = request.args.to_dict()
+        format_pagination(args)
+
+        # Переименовываем некоторые поля, которые на сервере называются по-другому.
+        
+
+        # Формируем запрос.
+        query = {}
+
+        # Получаем объекты, которые подходят под все условия, заданные на клиенте.
+        data = get_objects_list(query, args["start"], args["end"] - args["start"])
+       
+        return make_response(jsonify({
+            "rowData": data,
+            "end": args["start"] + len(data)
+        }) , 200)
 
 
 @api.route('/object/<string:obj_id>')

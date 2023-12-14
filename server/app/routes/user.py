@@ -1,3 +1,4 @@
+from flask import request, jsonify, make_response
 from flask_login import login_required, current_user
 from flask_restx import Namespace, Resource, fields
 from werkzeug.local import LocalProxy
@@ -6,6 +7,8 @@ from app.auth.authorization import role_require
 from app.db import get_db
 from app.services.user import get_user_by_id, find_user, update_user, delete_user
 from app.utils import parse_json
+from app.services.pagination import format_pagination
+
 
 api = Namespace("users", description="Операции с пользователями")
 
@@ -52,6 +55,27 @@ class UserList(Resource):
     @role_require('admin')
     def get(self):
         return parse_json(db.users.find())
+    
+
+@api.route('/table/')
+class ImagesForTable(Resource):
+    def get(self):
+        args = request.args.to_dict()
+        format_pagination(args)
+
+        # Переименовываем некоторые поля, которые на сервере называются по-другому.
+        
+
+        # Формируем запрос.
+        query = {}
+
+        # Получаем юзеров, которые подходят под все условия, заданные на клиенте.
+        data = parse_json(db.users.find(query).skip(args["start"]).limit(args["end"] - args["start"]))
+       
+        return make_response(jsonify({
+            "rowData": data,
+            "end": args["start"] + len(data)
+        }) , 200)
 
 
 @api.route('/user/<string:id>')
