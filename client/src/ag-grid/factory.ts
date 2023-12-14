@@ -23,6 +23,17 @@ export function getColDefFilterText(): ColDef {
   };
 }
 
+export function getColDefFilterId(): ColDef {
+  return {
+    filter: 'agTextColumnFilter',
+    filterParams: {
+      filterOptions: ['equal'],
+      debounce: 1000,
+      maxNumConditions: 1
+    }
+  };
+}
+
 export function getColDefFilterDate(): ColDef {
   return {
     filter: 'agDateColumnFilter',

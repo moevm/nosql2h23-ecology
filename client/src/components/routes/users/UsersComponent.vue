@@ -66,6 +66,7 @@ import {
   fitActionsColumn,
   getActionsColDef,
   getGridOptionsForSSDM,
+  getColDefFilterId,
   getColDefFilterText
 } from "@/ag-grid/factory";
 import { DataSource } from "@/ag-grid/datasource";
@@ -94,7 +95,7 @@ const users = ref<User[]>([]),
   selected = ref<User | null>(null);
 
 const columnDefs: ColDef<User>[] = [
-  { headerName: "Id", field: "_id.$oid", flex: 2, minWidth: 80, ...getColDefFilterText() },
+  { headerName: "Id", field: "_id.$oid", flex: 2, minWidth: 80, ...getColDefFilterId() },
   { headerName: "Логин", field: "login", flex: 3, minWidth: 180, ...getColDefFilterText() },
   { headerName: "Имя", field: "name", flex: 3, minWidth: 100, ...getColDefFilterText() },
   { headerName: "Роль", field: "role", flex: 3, minWidth: 90, ...getColDefFilterText() },

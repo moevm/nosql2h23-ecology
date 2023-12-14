@@ -47,14 +47,14 @@ const columnDefs: ColDef<ObjectInfo>[] = [
   { headerName: "Тип", field: "type", flex: 4, minWidth: 80 },
   { headerName: "Название", field: "name", flex: 4, minWidth: 80 },
   {
-    headerName: "Дата загрузки",
+    headerName: "Дата изменения",
     field: "updateDatetime",
     flex: 5,
     minWidth: 180,
     valueFormatter: dateFormatter
   },
   {
-    headerName: "Id загрузившего пользователя",
+    headerName: "Id изменившего пользователя",
     field: "updateUserId",
     flex: 5,
     minWidth: 200,

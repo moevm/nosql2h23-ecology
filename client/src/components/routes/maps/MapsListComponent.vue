@@ -39,6 +39,7 @@ import {
   fitActionsColumn,
   getActionsColDef,
   getGridOptionsForSSDM,
+  getColDefFilterId,
   getColDefFilterText,
   getColDefFilterDate
 } from "@/ag-grid/factory";
@@ -59,7 +60,7 @@ const userStore = useUserStore();
 let gridApi: GridApi;
 
 const columnDefs: ColDef<MapInfo>[] = [
-  { headerName: "Id", field: "id", flex: 2, minWidth: 80, ...getColDefFilterText() },
+  { headerName: "Id", field: "id", flex: 2, minWidth: 80, ...getColDefFilterId() },
   { headerName: "Имя", field: "name", flex: 3, minWidth: 180, ...getColDefFilterText() },
   {
     headerName: "Дата загрузки",
@@ -74,7 +75,7 @@ const columnDefs: ColDef<MapInfo>[] = [
     field: "updateUserId",
     flex: 5,
     minWidth: 100,
-    ...getColDefFilterText()
+    ...getColDefFilterId()
   },
   {
     headerName: "Обработано",

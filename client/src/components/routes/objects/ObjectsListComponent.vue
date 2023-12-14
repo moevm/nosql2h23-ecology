@@ -1,8 +1,8 @@
 <template>
   <div class="container-lg mt-3">
     <h3>База объектов</h3>
-    <div class="text-end mb-2" @click="exportData">
-      <button class="btn btn-primary">Экспорт</button>
+    <div class="text-end mb-2">
+      <button class="btn btn-primary" @click="exportData">Экспорт</button>
     </div>
     <AgGridVue
       class="ag-theme-alpine"
@@ -24,6 +24,7 @@ import {
   fitActionsColumn,
   getActionsColDef,
   getGridOptionsForSSDM,
+  getColDefFilterId,
   getColDefFilterText,
   getColDefFilterDate
 } from "@/ag-grid/factory";
@@ -37,11 +38,11 @@ import { exportObjects } from "@/components/routes/objects/api";
 const router = useRouter();
 
 const columnDefs: ColDef<ObjectInfo>[] = [
-  { headerName: "Id", field: "id", flex: 2, minWidth: 120, ...getColDefFilterText() },
+  { headerName: "Id", field: "id", flex: 2, minWidth: 120, ...getColDefFilterId() },
   { headerName: "Тип", field: "type", flex: 4, minWidth: 80, ...getColDefFilterText() },
   { headerName: "Название", field: "name", flex: 4, minWidth: 80, ...getColDefFilterText() },
   {
-    headerName: "Дата загрузки",
+    headerName: "Дата изменения",
     field: "updateDatetime",
     flex: 5,
     minWidth: 200,
@@ -49,11 +50,11 @@ const columnDefs: ColDef<ObjectInfo>[] = [
     ...getColDefFilterDate()
   },
   {
-    headerName: "Id загрузившего пользователя",
+    headerName: "Id изменившего пользователя",
     field: "updateUserId",
     flex: 5,
     minWidth: 100,
-    ...getColDefFilterText()
+    ...getColDefFilterId()
   },
   {
     ...getActionsColDef([
