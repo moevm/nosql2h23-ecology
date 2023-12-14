@@ -152,8 +152,7 @@ class ObjectBase:
                     "type": self.name,
                     "name": self.name,
                     "color": self.color,
-                    # TO DO: -1 индекс - это автоматическая обработка?
-                    "update": {"user_id": -1, "datetime": str(arrow.now().to('UTC'))},
+                    "update": {"user_id": "auto_generated", "datetime": str(arrow.now().to('UTC'))},
                     "coordinates": self.polygons[i],
                     "center": self.centers[i],
                 })
