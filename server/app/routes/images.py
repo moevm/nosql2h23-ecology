@@ -5,7 +5,6 @@ from redis.client import StrictRedis
 from werkzeug.local import LocalProxy
 from bson.objectid import ObjectId
 
-from app import socketio
 from app.db import get_db, get_tiles, get_maps, get_redis
 from app.tasks import process_image
 from app.tasks import slice
@@ -125,7 +124,6 @@ class Image(Resource):
             for tile in db.tiles.files.find({"image_id": ObjectId(img_id)}):
                 tiles_fs.delete(tile["_id"])
 
-            socketio.emit("images", get_images_list()) #update sockets
             return jsonify({'message': 'Image deleted successfully'})
         
         return 'OK'

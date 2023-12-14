@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import { AgGridVue } from "ag-grid-vue3";
-import { ColDef, GridOptions, GridReadyEvent } from "ag-grid-community";
+import { ColDef, GridApi, GridOptions, GridReadyEvent } from "ag-grid-community";
 
 import {
   fitActionsColumn,
@@ -54,8 +54,8 @@ import { useUserStore } from "@/store/user";
 
 
 const router = useRouter();
-
 const userStore = useUserStore();
+let gridApi: GridApi;
 
 const columnDefs: ColDef<MapInfo>[] = [
   { headerName: "Id", field: "id", flex: 2, minWidth: 80, ...getColDefFilterText() },
@@ -122,7 +122,8 @@ const options: GridOptions<MapInfo> = {
 
 function onGridReady(params: GridReadyEvent) {
   fitActionsColumn({ "columnApi": params.columnApi });
-  params.api.setDatasource(new DataSource("/images/table"));
+  gridApi = params.api;
+  gridApi.setDatasource(new DataSource("/images/table"));
 }
 
 // Для модального окна удаления.
@@ -131,7 +132,7 @@ const modal = ref<InstanceType<typeof Modal> | null>(null),
 
 function acceptDelDialog() {
   modal.value?.close();
-  if (delElement.value) deleteMap(delElement.value);
+  if (delElement.value) deleteMap(delElement.value, gridApi);
 }
 </script>
 
