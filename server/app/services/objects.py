@@ -12,4 +12,6 @@ def bulk_upload_objects(new_objects):
             if k not in obj:
                 return "Not ok"
         del obj['_id']
-    db.objects.insert_many(new_objects)
+
+    if len(new_objects):
+        db.objects.insert_many(new_objects)

@@ -26,10 +26,16 @@ def delete_user(id: str):
 def bulk_upload_users(new_users):
     users_keys = ["_id", "login", "password", "name", "role"]
     for user in new_users:
-        if db.users.find_one({"login": user["login"]}):
-            return f"User with login {user['login']} already exists"
         for k in users_keys:
             if k not in user:
                 return "Not ok"
         del user['_id']
-    db.users.insert_many(new_users)
+
+    # Пропускаем уже существующих пользователей
+    new_users = list(filter(
+        lambda user: not db.users.find_one({"login": user["login"]}),
+        new_users
+    ))
+
+    if len(new_users):
+        db.users.insert_many(new_users)
