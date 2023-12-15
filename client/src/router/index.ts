@@ -11,6 +11,7 @@ export const routeNames = {
   Auth: "Auth",
   Users: "Users",
   Profile: "Profile",
+  Dumps: "Dumps",
 };
 
 export const routePaths = {
@@ -24,6 +25,7 @@ export const routePaths = {
   [routeNames.Auth]: "/auth",
   [routeNames.Users]: "/users",
   [routeNames.Profile]: "/profile",
+  [routeNames.Dumps]: "/dumps",
 };
 
 export const routes: RouteRecordRaw[] = [
@@ -86,6 +88,12 @@ export const routes: RouteRecordRaw[] = [
     name: routeNames.Profile,
     path: routePaths[routeNames.Profile],
     component: () => import("@/views/ProfileView.vue"),
+  },
+
+  {
+    name: routeNames.Dumps,
+    path: routePaths[routeNames.Dumps],
+    component: () => import("@/views/DumpView.vue"),
   },
 ];
 

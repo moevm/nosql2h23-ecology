@@ -7,6 +7,7 @@ from bson.objectid import ObjectId
 import json
 
 from app.db import get_db, get_tiles, get_maps, get_redis
+from app.services.objects import bulk_upload_objects
 from app.utils import parse_json
 
 db = LocalProxy(get_db)
@@ -136,11 +137,5 @@ class ObjectsImpex(Resource):
     @login_required
     def post(self):
         new_objects = json.load(request.files['objects'])
-        object_keys = ["_id", "type", "name", "color", "update", "coordinates", "center"]
-        for obj in new_objects:
-            for k in object_keys:
-                if k not in obj:
-                    return "Not ok"
-            del obj['_id']
-        db.objects.insert_many(new_objects)
+        bulk_upload_objects(new_objects)
         return "Ok"

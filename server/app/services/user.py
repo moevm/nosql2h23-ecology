@@ -21,3 +21,21 @@ def update_user(id: str, data):
 
 def delete_user(id: str):
     db.users.delete_one({"_id": ObjectId(id)})
+
+
+def bulk_upload_users(new_users):
+    users_keys = ["_id", "login", "password", "name", "role"]
+    for user in new_users:
+        for k in users_keys:
+            if k not in user:
+                raise Exception('invalid user property')
+        del user['_id']
+
+    # Пропускаем уже существующих пользователей
+    new_users = list(filter(
+        lambda user: not db.users.find_one({"login": user["login"]}),
+        new_users
+    ))
+
+    if len(new_users):
+        db.users.insert_many(new_users)
