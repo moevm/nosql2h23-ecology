@@ -10,7 +10,7 @@ def bulk_upload_objects(new_objects):
     for obj in new_objects:
         for k in object_keys:
             if k not in obj:
-                return "Not ok"
+                raise Exception('invalid object property')
         del obj['_id']
 
     if len(new_objects):

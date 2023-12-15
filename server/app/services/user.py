@@ -28,7 +28,7 @@ def bulk_upload_users(new_users):
     for user in new_users:
         for k in users_keys:
             if k not in user:
-                return "Not ok"
+                raise Exception('invalid user property')
         del user['_id']
 
     # Пропускаем уже существующих пользователей
