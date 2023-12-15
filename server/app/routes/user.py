@@ -1,10 +1,13 @@
+import json
+
+from flask import request
 from flask_login import login_required, current_user
 from flask_restx import Namespace, Resource, fields
 from werkzeug.local import LocalProxy
 
 from app.auth.authorization import role_require
 from app.db import get_db
-from app.services.user import get_user_by_id, find_user, update_user, delete_user
+from app.services.user import get_user_by_id, find_user, update_user, delete_user, bulk_upload_users
 from app.utils import parse_json
 
 api = Namespace("users", description="Операции с пользователями")
@@ -105,6 +108,7 @@ class UserResource(Resource):
         update_user(current_user.get_id(), args)
         return 'Updated'
 
+
 @api.route('/impex')
 class UserResource(Resource):
     def get(self):
@@ -113,13 +117,5 @@ class UserResource(Resource):
     @login_required
     def post(self):
         new_users = json.load(request.files['users'])
-        users_keys = ["_id", "login", "passwod", "name", "state"] # Has user got property "role" ?
-        for user in new_users:
-            if db.users.find_one({"login": user["login"]}):
-                return f"User with login {user["login"]} already exists"
-            for k in users_keys:
-                if k not in user:
-                    return "Not ok"
-            del user['_id']
-        db.users.insert_many(new_users)
+        bulk_upload_users(new_users)
         return "OK"

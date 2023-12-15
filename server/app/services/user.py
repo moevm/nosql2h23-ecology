@@ -21,3 +21,15 @@ def update_user(id: str, data):
 
 def delete_user(id: str):
     db.users.delete_one({"_id": ObjectId(id)})
+
+
+def bulk_upload_users(new_users):
+    users_keys = ["_id", "login", "password", "name", "role"]
+    for user in new_users:
+        if db.users.find_one({"login": user["login"]}):
+            return f"User with login {user['login']} already exists"
+        for k in users_keys:
+            if k not in user:
+                return "Not ok"
+        del user['_id']
+    db.users.insert_many(new_users)
