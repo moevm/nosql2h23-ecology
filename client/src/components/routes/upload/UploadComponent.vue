@@ -18,11 +18,11 @@
           data-bs-toggle="tab"
           data-bs-target="#import"
         >
-          Импорт
+          Импорт объектов
         </button>
       </li>
     </ul>
-    <div id="myTabContent" class="tab-content">
+    <div class="tab-content">
       <div id="maps" class="tab-pane fade show active mt-3">
         <div class="m-auto col-10 col-lg-6">
           <FormKit type="form" :actions="false" @submit="submit">

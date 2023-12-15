@@ -2,7 +2,7 @@
   <div class="container-lg mt-3">
     <h3>База объектов</h3>
     <div class="text-end mb-2" @click="exportData">
-      <button class="btn btn-primary">Экспорт</button>
+      <button class="btn btn-primary">Экспорт объектов</button>
     </div>
     <AgGridVue
       class="ag-theme-alpine"
