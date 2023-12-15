@@ -22,8 +22,8 @@
         </button>
       </li>
     </ul>
-    <div class="tab-content">
-      <div id="maps" class="tab-pane fade show active mt-3">
+    <div class="tab-content mt-3">
+      <div id="maps" class="tab-pane fade show active">
         <div class="m-auto col-10 col-lg-6">
           <FormKit type="form" :actions="false" @submit="submit">
             <FormKit
@@ -50,7 +50,7 @@
           </FormKit>
         </div>
       </div>
-      <div id="import" class="tab-pane fade mt-3">
+      <div id="import" class="tab-pane fade">
         <div class="m-auto col-10 col-lg-6">
           <FormKit type="form" :actions="false" @submit="submitImport">
             <FormKit
@@ -125,7 +125,6 @@ async function submit(data: FormKitGroupValue) {
 }
 
 async function submitImport(data: FormKitGroupValue) {
-  console.log(data);
   try {
     await uploadObjects((data.files as { file: File }[])[0].file);
 
