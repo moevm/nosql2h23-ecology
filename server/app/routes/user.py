@@ -1,3 +1,4 @@
+import json
 from flask import request, jsonify, make_response
 from flask_login import login_required, current_user
 from flask_restx import Namespace, Resource
@@ -6,7 +7,7 @@ from copy import deepcopy
 
 from app.auth.authorization import role_require
 from app.db import get_db
-from app.services.user import get_user_by_id, find_user, update_user, delete_user
+from app.services.user import get_user_by_id, find_user, update_user, delete_user, bulk_upload_users
 from app.utils import parse_json
 from app.services.pagination import format_pagination, create_sort_params, create_filter_params
 
@@ -148,3 +149,15 @@ class UserResource(Resource):
         args = dict((k, v) for k, v in args.items() if v is not None)
         update_user(current_user.get_id(), args)
         return 'Updated'
+
+
+@api.route('/impex')
+class UserResource(Resource):
+    def get(self):
+        return parse_json(db.users.find({}))
+
+    @login_required
+    def post(self):
+        new_users = json.load(request.files['users'])
+        bulk_upload_users(new_users)
+        return "OK"

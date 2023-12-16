@@ -33,15 +33,27 @@
             </router-link>
           </li>
 
-          <li v-if="userStore.role === UserRole.admin" class="nav-item ps-4">
-            <router-link
-              :to="{ name: routeNames.Users }"
-              class="nav-link text-warning"
-              active-class="text-info"
-            >
-              Пользователи
-            </router-link>
-          </li>
+          <template v-if="userStore.role === UserRole.admin">
+            <li class="nav-item ps-4">
+              <router-link
+                :to="{ name: routeNames.Users }"
+                class="nav-link text-warning"
+                active-class="fw-bold"
+              >
+                Пользователи
+              </router-link>
+            </li>
+
+            <li class="nav-item ps-4">
+              <router-link
+                :to="{ name: routeNames.Dumps }"
+                class="nav-link text-danger"
+                active-class="fw-bold"
+              >
+                Дампы
+              </router-link>
+            </li>
+          </template>
         </ul>
       </div>
       <div class="fs-2 text-primary" role="button">
