@@ -1,14 +1,16 @@
-from flask import request
+from flask import request, jsonify, make_response
 from flask_login import login_required
 from flask_restx import Namespace, Resource
 from redis.client import StrictRedis
 from werkzeug.local import LocalProxy
 from bson.objectid import ObjectId
 import json
+from copy import deepcopy
 
 from app.db import get_db, get_tiles, get_maps, get_redis
 from app.services.objects import bulk_upload_objects
 from app.utils import parse_json
+from app.services.pagination import format_pagination, create_sort_params, create_filter_params
 
 db = LocalProxy(get_db)
 tiles_fs = LocalProxy(get_tiles)
@@ -18,23 +20,73 @@ redis: StrictRedis = LocalProxy(get_redis)
 api = Namespace("objects", description="Операции с объедками")
 
 
+def get_objects_list(find_query={}, skip=0, limit=0, sort=[]):
+    objects_records = []
+    if sort: objects_records = db.objects.find(find_query).skip(skip).limit(limit).sort(sort)
+    else: objects_records = db.objects.find(find_query).skip(skip).limit(limit)
+
+
+    objects = []
+    for map_object in objects_records:
+        objects.append({
+            "id": str(map_object["_id"]),
+            "type": map_object["type"],
+            "name": map_object["name"],
+            "color": map_object["color"],
+            "updateUserId": str(map_object["update"]["user_id"]),
+            "updateDatetime": map_object["update"]["datetime"],
+            "coordinates": map_object["coordinates"],
+            # Переворачиваем, чтобы получить [lat, lng] для leaflet
+            "center": [map_object["center"][1], map_object["center"][0]],
+        })
+
+    return objects
+
+
 @api.route('/')
 class ObjectsList(Resource):
     def get(self):
-        objects = []
-        for map_object in db.objects.find({}):
-            objects.append({
-                "id": str(map_object["_id"]),
-                "type": map_object["type"],
-                "name": map_object["name"],
-                "color": map_object["color"],
-                "updateUserId": map_object["update"]["user_id"],
-                "updateDatetime": map_object["update"]["datetime"],
-                "coordinates": map_object["coordinates"],
-                # Переворачиваем, чтобы получить [lat, lng] для leaflet
-                "center": [map_object["center"][1], map_object["center"][0]],
-            })
-        return objects
+        return get_objects_list()
+    
+
+@api.route('/table/')
+class ImagesForTable(Resource):
+    def get(self):
+        args = request.args.to_dict()
+        format_pagination(args)
+
+        # Переименовываем некоторые поля, которые на сервере называются по-другому.
+        for sort_opt in args["sort"]:
+            if sort_opt["colId"] == "updateDatetime":
+                sort_opt["colId"] = "update.datetime"
+            elif sort_opt["colId"] == "updateUserId":
+                sort_opt["colId"] = "update.user_id"
+            elif sort_opt["colId"] == "id":
+                sort_opt["colId"] = "_id"
+
+        filter_args = deepcopy(args["filter"])
+        for filter_key, filter_value in filter_args.items():
+            new_key = filter_key
+            if filter_key == "updateUserId":
+                new_key = "update.user_id"
+            elif filter_key == "updateDatetime":
+                new_key = "update.datetime"
+            elif filter_key == "id":
+                new_key = "_id"
+            args["filter"].pop(filter_key)
+            args["filter"][new_key] = filter_value
+
+        # Формируем запрос.
+        query = create_filter_params(args["filter"])
+        sort = create_sort_params(args["sort"])
+
+        # Получаем объекты, которые подходят под все условия, заданные на клиенте.
+        data = get_objects_list(query, args["start"], args["end"] - args["start"], sort)
+       
+        return make_response(jsonify({
+            "rowData": data,
+            "end": args["start"] + len(data)
+        }) , 200)
 
 
 @api.route('/object/<string:obj_id>')
@@ -46,7 +98,7 @@ class ImageObjects(Resource):
             "type": map_object["type"],
             "name": map_object["name"],
             "color": map_object["color"],
-            "updateUserId": map_object["update"]["user_id"],
+            "updateUserId": str(map_object["update"]["user_id"]),
             "updateDatetime": map_object["update"]["datetime"],
             "coordinates": map_object["coordinates"],
             # Переворачиваем, чтобы получить [lat, lng] для leaflet
@@ -78,7 +130,7 @@ class ObjectsNear(Resource):
                 "type": map_object["type"],
                 "name": map_object["name"],
                 "color": map_object["color"],
-                "updateUserId": map_object["update"]["user_id"],
+                "updateUserId": str(map_object["update"]["user_id"]),
                 "updateDatetime": map_object["update"]["datetime"],
                 "coordinates": map_object["coordinates"],
                 # Переворачиваем, чтобы получить [lat, lng] для leaflet
@@ -109,7 +161,7 @@ class ObjectsUpdate(Resource):
                     obj["_id"] = ObjectId(obj["id"])
                     obj.pop("id")
                 # updateUserId и updateDatetime на update: {user_id, datetime}
-                obj["update"] = {"user_id": obj["updateUserId"], "datetime": obj["updateDatetime"]}
+                obj["update"] = {"user_id": ObjectId(obj["updateUserId"]), "datetime": obj["updateDatetime"]}
                 obj.pop("updateUserId")
                 obj.pop("updateDatetime")
 

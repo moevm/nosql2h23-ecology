@@ -5,10 +5,46 @@ import ActionsRenderer from "@/components/renderers/ActionsRenderer.vue";
 
 export function getDefaultColDef(): ColDef {
   return {
-    filter: true,
     sortable: true,
     editable: false,
     resizable: true,
+    filterParams: {
+      buttons: ["reset", "apply"],
+      closeOnApply: true,
+    },
+  };
+}
+
+export function getColDefFilterText(): ColDef {
+  return {
+    filter: "agTextColumnFilter",
+    filterParams: {
+      filterOptions: ["contains", "notContains"],
+      debounce: 1000,
+      maxNumConditions: 1,
+    },
+  };
+}
+
+export function getColDefFilterId(): ColDef {
+  return {
+    filter: "agTextColumnFilter",
+    filterParams: {
+      filterOptions: ["equals"],
+      debounce: 1000,
+      maxNumConditions: 1,
+    },
+  };
+}
+
+export function getColDefFilterDate(): ColDef {
+  return {
+    filter: "agDateColumnFilter",
+    filterParams: {
+      filterOptions: ["equals", "lessThan", "greaterThan"],
+      debounce: 1000,
+      maxNumConditions: 1,
+    },
   };
 }
 
@@ -22,6 +58,18 @@ export function getDefaultGridOptions(): GridOptions {
   };
 }
 
+export function getGridOptionsForSSDM(): GridOptions {
+  return {
+    ...getDefaultGridOptions(),
+    domLayout: "autoHeight",
+    animateRows: true,
+    rowModelType: "infinite",
+    cacheBlockSize: defaultPageSize,
+    pagination: true,
+    paginationPageSize: defaultPageSize,
+  };
+}
+
 export function getActionsColDef<T>(actions: Action<T>[]): ColDef<T> {
   return {
     colId: "actions",
@@ -32,12 +80,14 @@ export function getActionsColDef<T>(actions: Action<T>[]): ColDef<T> {
     },
     sortable: false,
     filter: false,
-    resizable: false,
+    resizable: true,
     pinned: "right",
     suppressMovable: true,
   };
 }
 
+export const defaultPageSize = 10;
+
 export function fitActionsColumn({ columnApi }: { columnApi: ColumnApi }) {
-  columnApi.autoSizeColumn("actions", true);
+  columnApi.autoSizeColumn("actions", false);
 }

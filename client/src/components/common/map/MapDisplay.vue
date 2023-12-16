@@ -43,7 +43,7 @@ const toaster = useToaster();
 
 // Данные текущего пользователя.
 const userStore = useUserStore();
-const userId = userStore.user ? userStore.user._id.$oid : "-1";
+const userId = userStore.user ? userStore.user._id.$oid : "undefined";
 
 // Для выбора имени и типа объекта.
 const objectTypes = Array.from(objectTypesColors.keys());

@@ -8,7 +8,7 @@
       :row-data="objectsInfo"
       :column-defs="columnDefs"
       :grid-options="options"
-      @grid-ready="fitActionsColumn"
+      @first-data-rendered="fitActionsColumn"
     />
     <div class="d-flex justify-content-center mt-3">
       <MapDisplay :x="x" :y="y" ref="mapDisplay" @objects-updated="objectsShow"/>
@@ -40,30 +40,21 @@ const mapDisplay = ref<InstanceType<typeof MapDisplay>>();
 let lastMarker: L.Marker | undefined = undefined;
 
 // Надеюсь, никто не заметит этот костыль, чтобы прогружались action-ы сразу :)
-const objectsInfo = ref<ObjectInfo[]>([{
-  id: "-",
-  type: "-",
-  name: "-",
-  color: "-",
-  updateUserId: "-",
-  updateDatetime: "-",
-  center: [0, 0],
-  coordinates: [[0, 0]]
-}]);
+const objectsInfo = ref<ObjectInfo[]>([]);
 
 const columnDefs: ColDef<ObjectInfo>[] = [
   { headerName: "Id", field: "id", flex: 2, minWidth: 120 },
   { headerName: "Тип", field: "type", flex: 4, minWidth: 80 },
   { headerName: "Название", field: "name", flex: 4, minWidth: 80 },
   {
-    headerName: "Дата загрузки",
+    headerName: "Дата изменения",
     field: "updateDatetime",
     flex: 5,
     minWidth: 180,
     valueFormatter: dateFormatter
   },
   {
-    headerName: "Id загрузившего пользователя",
+    headerName: "Id изменившего пользователя",
     field: "updateUserId",
     flex: 5,
     minWidth: 200,

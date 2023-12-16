@@ -1,53 +1,60 @@
 <template>
   <div class="container-lg mt-3">
     <h3>База объектов</h3>
-    <div class="text-end mb-2" @click="exportData">
-      <button class="btn btn-primary">Экспорт объектов</button>
+    <div class="text-end mb-2">
+      <button class="btn btn-primary" @click="exportData">Экспорт</button>
     </div>
     <AgGridVue
       class="ag-theme-alpine"
       :column-defs="columnDefs"
-      :row-data="data"
       :grid-options="options"
-      @grid-ready="fitActionsColumn"
+      @grid-ready="onGridReady"
+      @first-data-rendered="fitActionsColumn"
     />
   </div>
 </template>
 
 <script setup lang="ts">
 import { AgGridVue } from "ag-grid-vue3";
-import { ColDef, GridOptions } from "ag-grid-community";
+import { ColDef, GridOptions, GridReadyEvent } from "ag-grid-community";
+import { useRouter } from "vue-router";
+import { saveAs } from "file-saver";
+
 import {
   fitActionsColumn,
   getActionsColDef,
-  getDefaultGridOptions,
+  getGridOptionsForSSDM,
+  getColDefFilterId,
+  getColDefFilterText,
+  getColDefFilterDate
 } from "@/ag-grid/factory";
+import { DataSource } from "@/ag-grid/datasource";
 import { dateFormatter } from "@/ag-grid/formatters";
 import { routeNames } from "@/router";
-import { useRouter } from "vue-router";
-
 import { ObjectInfo } from "@/types/objects";
-import { exportObjects, getObjectsInfo } from "@/components/routes/objects/api";
-import { saveAs } from "file-saver";
+import { exportObjects } from "@/components/routes/objects/api";
+
 
 const router = useRouter();
 
 const columnDefs: ColDef<ObjectInfo>[] = [
-  { headerName: "Id", field: "id", flex: 2, minWidth: 120 },
-  { headerName: "Тип", field: "type", flex: 4, minWidth: 80 },
-  { headerName: "Название", field: "name", flex: 4, minWidth: 80 },
+  { headerName: "Id", field: "id", flex: 2, minWidth: 120, ...getColDefFilterId() },
+  { headerName: "Тип", field: "type", flex: 4, minWidth: 80, ...getColDefFilterText() },
+  { headerName: "Название", field: "name", flex: 4, minWidth: 80, ...getColDefFilterText() },
   {
-    headerName: "Дата загрузки",
+    headerName: "Дата изменения",
     field: "updateDatetime",
     flex: 5,
     minWidth: 200,
     valueFormatter: dateFormatter,
+    ...getColDefFilterDate()
   },
   {
-    headerName: "Id загрузившего пользователя",
+    headerName: "Id изменившего пользователя",
     field: "updateUserId",
     flex: 5,
     minWidth: 100,
+    ...getColDefFilterId()
   },
   {
     ...getActionsColDef([
@@ -66,11 +73,13 @@ const columnDefs: ColDef<ObjectInfo>[] = [
 ];
 
 const options: GridOptions<ObjectInfo> = {
-  ...getDefaultGridOptions(),
+  ...getGridOptionsForSSDM(),
   domLayout: "autoHeight",
 };
 
-const data = await getObjectsInfo();
+function onGridReady(params: GridReadyEvent) {
+  params.api.setDatasource(new DataSource("/objects/table"));
+}
 
 async function exportData() {
   const data = (await exportObjects()).data;

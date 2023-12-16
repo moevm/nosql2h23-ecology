@@ -1,10 +1,6 @@
 import { api } from "@/api";
-import { User } from "@/types/users";
 import { UserCreation } from "@/components/routes/users/types";
 
-function getUsers() {
-  return api.get<User[]>("/users/");
-}
 
 function createUser(user: UserCreation) {
   return api.post<string>("/users/", user);
@@ -18,4 +14,4 @@ function updateUser(id: string, user: UserCreation) {
   return api.put(`/users/user/${id}`, user);
 }
 
-export const UserAdminAPI = { getUsers, createUser, deleteUser, updateUser };
+export const UserAdminAPI = { createUser, deleteUser, updateUser };
