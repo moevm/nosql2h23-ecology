@@ -99,4 +99,6 @@ export const agGridLocalization = {
   ctrlC: "Ctrl+C",
   paste: "Вставить",
   ctrlV: "Ctrl+V",
+
+  resetFilter: "Сброс",
 };

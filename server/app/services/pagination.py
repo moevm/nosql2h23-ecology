@@ -25,7 +25,7 @@ def create_filter_params(filter_args):
     for filter_field, filter_args in filter_args.items():
         if filter_args["filterType"] == "date":
             filter_args["dateFrom"] = filter_args["dateFrom"].split(" ")[0]
-            if filter_args["type"] == "equal":
+            if filter_args["type"] == "equals":
                 filter_params[filter_field] = {"$regex": re.escape(filter_args["dateFrom"])}
             elif filter_args["type"] == "lessThan":
                 filter_params[filter_field] = {"$lt": filter_args["dateFrom"]}
@@ -37,7 +37,7 @@ def create_filter_params(filter_args):
                 filter_params[filter_field] = {"$regex": re.escape(filter_args["filter"])}
             elif filter_args["type"] == "notContains":
                 filter_params[filter_field] = {"$not": {"$regex": re.escape(filter_args["filter"])}}
-            elif filter_args["type"] == "equal":
+            elif filter_args["type"] == "equals":
                 try:
                     filter_args["filter"] = ObjectId(filter_args["filter"])
                 except InvalidId:

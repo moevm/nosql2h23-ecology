@@ -67,7 +67,7 @@ import {
   getActionsColDef,
   getGridOptionsForSSDM,
   getColDefFilterId,
-  getColDefFilterText
+  getColDefFilterText,
 } from "@/ag-grid/factory";
 import { DataSource } from "@/ag-grid/datasource";
 import { User } from "@/types/users";
@@ -80,7 +80,6 @@ import { useToaster } from "@/store/toaster";
 import UserDataModal from "@/components/routes/users/UserDataModal.vue";
 import Modal from "@/components/common/Modal.vue";
 import { getEmptyUser } from "@/config/users";
-
 
 const router = useRouter();
 
@@ -95,10 +94,34 @@ const users = ref<User[]>([]),
   selected = ref<User | null>(null);
 
 const columnDefs: ColDef<User>[] = [
-  { headerName: "Id", field: "_id.$oid", flex: 2, minWidth: 80, ...getColDefFilterId() },
-  { headerName: "Логин", field: "login", flex: 3, minWidth: 180, ...getColDefFilterText() },
-  { headerName: "Имя", field: "name", flex: 3, minWidth: 100, ...getColDefFilterText() },
-  { headerName: "Роль", field: "role", flex: 3, minWidth: 90, ...getColDefFilterText() },
+  {
+    headerName: "Id",
+    field: "_id.$oid",
+    flex: 2,
+    minWidth: 80,
+    ...getColDefFilterId(),
+  },
+  {
+    headerName: "Логин",
+    field: "login",
+    flex: 3,
+    minWidth: 180,
+    ...getColDefFilterText(),
+  },
+  {
+    headerName: "Имя",
+    field: "name",
+    flex: 3,
+    minWidth: 100,
+    ...getColDefFilterText(),
+  },
+  {
+    headerName: "Роль",
+    field: "role",
+    flex: 3,
+    minWidth: 90,
+    ...getColDefFilterText(),
+  },
 
   {
     ...getActionsColDef([
@@ -155,23 +178,23 @@ function showAddModal() {
 }
 
 async function onAdd(user: User) {
-  const id = (await UserAdminAPI.createUser(_.omit(user, "_id"))).data;
-  users.value = [{ ...user, _id: { $oid: id } }, ...users.value];
+  await UserAdminAPI.createUser(_.omit(user, "_id"));
+  options.api?.refreshInfiniteCache();
+  options.api?.refreshCells();
 }
 
 async function onRemove() {
   if (selected.value) {
     await UserAdminAPI.deleteUser(selected.value._id.$oid);
-    users.value = users.value.filter(
-      (u) => u._id.$oid !== selected.value?._id.$oid
-    );
+    options.api?.refreshInfiniteCache();
+    options.api?.refreshCells();
     deleteModal.value?.close();
   }
 }
 
 async function onEdit(user: User) {
   await UserAdminAPI.updateUser(user._id.$oid, _.omit(user, "_id"));
-  _.assign(selected.value, user);
+  options.api?.refreshInfiniteCache();
   options.api?.refreshCells();
 }
 </script>

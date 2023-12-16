@@ -33,7 +33,12 @@
 
 <script setup lang="ts">
 import { AgGridVue } from "ag-grid-vue3";
-import { ColDef, GridApi, GridOptions, GridReadyEvent } from "ag-grid-community";
+import {
+  ColDef,
+  GridApi,
+  GridOptions,
+  GridReadyEvent,
+} from "ag-grid-community";
 
 import {
   fitActionsColumn,
@@ -41,7 +46,7 @@ import {
   getGridOptionsForSSDM,
   getColDefFilterId,
   getColDefFilterText,
-  getColDefFilterDate
+  getColDefFilterDate,
 } from "@/ag-grid/factory";
 import { DataSource } from "@/ag-grid/datasource";
 import { deleteMap } from "@/components/routes/maps/api";
@@ -54,28 +59,39 @@ import Modal from "@/components/common/Modal.vue";
 import { ref } from "vue";
 import { useUserStore } from "@/store/user";
 
-
 const router = useRouter();
 const userStore = useUserStore();
 let gridApi: GridApi;
 
 const columnDefs: ColDef<MapInfo>[] = [
-  { headerName: "Id", field: "id", flex: 2, minWidth: 80, ...getColDefFilterId() },
-  { headerName: "Имя", field: "name", flex: 3, minWidth: 180, ...getColDefFilterText() },
+  {
+    headerName: "Id",
+    field: "id",
+    flex: 2,
+    minWidth: 80,
+    ...getColDefFilterId(),
+  },
+  {
+    headerName: "Имя",
+    field: "name",
+    flex: 3,
+    minWidth: 180,
+    ...getColDefFilterText(),
+  },
   {
     headerName: "Дата загрузки",
     field: "updateDatetime",
     flex: 5,
     minWidth: 180,
     valueFormatter: dateFormatter,
-    ...getColDefFilterDate()
+    ...getColDefFilterDate(),
   },
   {
     headerName: "Id загрузившего пользователя",
     field: "updateUserId",
     flex: 5,
     minWidth: 100,
-    ...getColDefFilterId()
+    ...getColDefFilterId(),
   },
   {
     headerName: "Обработано",
@@ -99,28 +115,31 @@ const columnDefs: ColDef<MapInfo>[] = [
         button: "btn-secondary",
         hide: (data) => !(data && data.ready && data.sliced),
         onClicked: (action, data) => {
-          router.push({ name: routeNames.Map, params: { y: data.center[0],
-                                                        x: data.center[1] } })
-        }
+          router.push({
+            name: routeNames.Map,
+            params: { y: data.center[0], x: data.center[1] },
+          });
+        },
       },
       {
         tooltip: "Удалить карту",
         icon: "bi bi-trash",
         button: "btn-danger",
-        hide: (data) => !(data && data.ready && data.sliced) || !userStore.isAuthed,
+        hide: (data) =>
+          !(data && data.ready && data.sliced) || !userStore.isAuthed,
         onClicked: (action, data) => {
           delElement.value = data.id;
           modal.value?.open();
         },
       },
     ]),
+    minWidth: 140,
   },
 ];
 
 const options: GridOptions<MapInfo> = {
-  ...getGridOptionsForSSDM()
+  ...getGridOptionsForSSDM(),
 };
-
 
 function onGridReady(params: GridReadyEvent) {
   gridApi = params.api;
