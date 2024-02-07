@@ -2,9 +2,8 @@
 
 interface ImportMetaEnv {
   readonly CLIENT_SERVER_URL: string;
-  readonly CLIENT_SERVER_PORT: string;
-  readonly MIN_ZOOM: number;
-  readonly MAX_ZOOM: number;
+  readonly CLIENT_MIN_ZOOM: number;
+  readonly CLIENT_MAX_ZOOM: number;
 }
 
 interface ImportMeta {

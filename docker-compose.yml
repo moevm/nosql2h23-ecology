@@ -67,11 +67,6 @@ services:
       - "127.0.0.1:3000:80"
     depends_on:
       - server
-    environment:
-      CLIENT_SERVER_URL: 'localhost'
-      CLIENT_SERVER_PORT: '5000'
-      MIN_ZOOM: 1
-      MAX_ZOOM: 17
 
   reverse-proxy:
     container_name: reverse-proxy
