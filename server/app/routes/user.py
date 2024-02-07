@@ -59,7 +59,7 @@ class UserList(Resource):
         return parse_json(db.users.find())
     
 
-@api.route('/table/')
+@api.route('/table')
 class ImagesForTable(Resource):
     def get(self):
         args = request.args.to_dict()

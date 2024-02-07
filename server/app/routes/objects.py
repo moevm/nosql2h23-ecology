@@ -49,7 +49,7 @@ class ObjectsList(Resource):
         return get_objects_list()
     
 
-@api.route('/table/')
+@api.route('/table')
 class ImagesForTable(Resource):
     def get(self):
         args = request.args.to_dict()
