@@ -1,4 +1,5 @@
 from flask_restx import Api
+from flask_restx.apidoc import apidoc
 
 from .images import api as images_api
 from .user import api as user_api
@@ -13,6 +14,8 @@ api = Api(
     prefix='/api',
     doc='/api/docs'
 )
+
+apidoc.static_url_path = "/api/docs/swaggerui"
 
 api.add_namespace(user_api)
 api.add_namespace(auth_api)
