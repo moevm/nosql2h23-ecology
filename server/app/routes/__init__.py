@@ -11,11 +11,11 @@ from .dump import api as dump_api
 api = Api(
     title="Ecology API",
     version="1.0",
-    prefix='/api',
-    doc='/api/docs'
+    prefix='/ecology/api',
+    doc='/ecology/api/docs'
 )
 
-apidoc.static_url_path = "/api/docs/swaggerui"
+apidoc.static_url_path = "/ecology/api/docs/swaggerui"
 
 api.add_namespace(user_api)
 api.add_namespace(auth_api)
