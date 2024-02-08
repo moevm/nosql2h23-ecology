@@ -5,8 +5,7 @@ import { ToastTypes } from "@/config/toast";
 
 const host = import.meta.env.CLIENT_SERVER_URL ?? "localhost:5000";
 
-export const serverURL = `http://${host}`;
-export const baseURL = `${serverURL}/api`;
+export const baseURL = `${host}/api`;
 
 export const api: AxiosInstance = axios.create({
   baseURL,
