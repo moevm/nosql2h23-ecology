@@ -3,9 +3,8 @@ import { useLoadingStore } from "@/store/loading";
 import { useToaster } from "@/store/toaster";
 import { ToastTypes } from "@/config/toast";
 
-const host = import.meta.env.CLIENT_SERVER_URL ?? "localhost:5000";
-
-export const baseURL = `${host}/api`;
+export const serverURL = import.meta.env.CLIENT_SERVER_URL ?? "localhost:5000";
+export const baseURL = `${serverURL}/api`;
 
 export const api: AxiosInstance = axios.create({
   baseURL,
