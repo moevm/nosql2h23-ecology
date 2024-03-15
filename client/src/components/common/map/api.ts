@@ -11,34 +11,33 @@ import { ObjectInfo } from "@/types/objects";
 import { objectTypesColors } from "@/api";
 import { ToastTypes } from "@/config/toast";
 
-
 export async function getMaps(
   y: number,
   x: number,
   r: number
 ): Promise<MapInfo[] | void> {
-  return (
-    await api.get<MapInfo[]>("/images/near/" + y + "/" + x + "/" + r)
-  ).data;
+  return (await api.get<MapInfo[]>("/images/near/" + y + "/" + x + "/" + r))
+    .data;
 }
-
 
 export async function getObjects(
   y: number,
   x: number,
   r: number
 ): Promise<ObjectInfo[]> {
-  return (
-    await api.get<ObjectInfo[]>("/objects/near/" + y + "/" + x + "/" + r)
-  ).data;
+  return (await api.get<ObjectInfo[]>("/objects/near/" + y + "/" + x + "/" + r))
+    .data;
 }
 
 export function initMap(y: number, x: number) {
   //  OpenStreetMap.
-  const osmLayer: L.Layer = L.tileLayer("https://{s}.tile.osm.org/{z}/{x}/{y}.png", {
-    attribution:
-      "&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors",
-  });
+  const osmLayer: L.Layer = L.tileLayer(
+    "https://{s}.tile.osm.org/{z}/{x}/{y}.png",
+    {
+      attribution:
+        "&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors",
+    }
+  );
 
   // Создание объекта карты.
   const map: L.Map = L.map("map", {
@@ -57,20 +56,19 @@ export function initMap(y: number, x: number) {
   });
   controlLayer.addTo(map);
 
-  return { map: map, controlLayer: controlLayer, osmLayer: osmLayer};
+  return { map: map, controlLayer: controlLayer, osmLayer: osmLayer };
 }
 
-
 export async function initDrawTools(
-  map: L.Map, 
+  map: L.Map,
   controlLayer: L.Control.Layers,
-  osmLayer: L.Layer, 
+  osmLayer: L.Layer,
   imagesList: Ref<MapInfo[]>,
   objectsList: Ref<ObjectInfo[]>,
   drawLayersList: {
-    edited: L.Layer[],
-    created: L.Layer[],
-    deleted: L.Layer[]
+    edited: L.Layer[];
+    created: L.Layer[];
+    deleted: L.Layer[];
   },
   chosenObjType: Ref<string>,
   chosenObjName: Ref<string>,
@@ -90,15 +88,15 @@ export async function initDrawTools(
     drawRectangle: false,
     drawCircle: false,
     drawText: false,
-    cutPolygon: false
+    cutPolygon: false,
   });
 
   // Создаем свои собственные функции.
   map.pm.Toolbar.createCustomControl({
-    name: 'endEditing',
-    block: 'custom',
-    className: 'bi bi-check icon-geoman',
-    title: 'Закончить редактирование объектов',
+    name: "endEditing",
+    block: "custom",
+    className: "bi bi-check icon-geoman",
+    title: "Закончить редактирование объектов",
     onClick: () => {
       // Посылаем изменения на запись в бд.
       sendObjects(drawLayersList, toaster, updateViewMapsAnsObjects);
@@ -113,12 +111,12 @@ export async function initDrawTools(
     },
     toggle: false,
   });
-  
+
   map.pm.Toolbar.createCustomControl({
-    name: 'closeEditing',
-    block: 'custom',
-    className: 'bi bi-x icon-geoman',
-    title: 'Поностью отменить редактирование объектов',
+    name: "closeEditing",
+    block: "custom",
+    className: "bi bi-x icon-geoman",
+    title: "Поностью отменить редактирование объектов",
     onClick: () => {
       // Убираем изменения.
       drawLayersList.created = [];
@@ -134,7 +132,7 @@ export async function initDrawTools(
   });
 
   // Добавляем слушателей событий с созданием, удалением и поворотом объектов.
-  map.on("pm:create", ({shape, layer}) => {
+  map.on("pm:create", ({ shape, layer }) => {
     // Сохраняем тип, имя и цвет объекта в метаданных.
     (layer as any).type = chosenObjType.value;
     (layer as any).name = chosenObjName.value;
@@ -148,8 +146,8 @@ export async function initDrawTools(
     addLayerListeners(layer, drawLayersList);
 
     // Добавляем в массив созданных пользователем слоев.
-    let inCreated = drawLayersList.created.findIndex(
-      (oldLayer) => checkLId(oldLayer, layer)
+    let inCreated = drawLayersList.created.findIndex((oldLayer) =>
+      checkLId(oldLayer, layer)
     );
 
     if (inCreated !== -1) {
@@ -159,24 +157,27 @@ export async function initDrawTools(
     }
     controlLayer.addOverlay(
       layer,
-      "<span style='color: " + (layer as any).color + "'> " +
-      (layer as any).name + " </span>"
+      "<span style='color: " +
+        (layer as any).color +
+        "'> " +
+        (layer as any).name +
+        " </span>"
     );
   });
 
-  map.on("pm:remove", ({shape, layer}) => {
+  map.on("pm:remove", ({ shape, layer }) => {
     // Добавляем в массив удаленных пользователем слоев (если он из тех, что уже были в бд).
-    let inCreated = drawLayersList.created.findIndex(
-      (oldLayer) => checkLId(oldLayer, layer)
+    let inCreated = drawLayersList.created.findIndex((oldLayer) =>
+      checkLId(oldLayer, layer)
     );
-    let inEdited = drawLayersList.edited.findIndex(
-      (oldLayer) => checkLId(oldLayer, layer)
+    let inEdited = drawLayersList.edited.findIndex((oldLayer) =>
+      checkLId(oldLayer, layer)
     );
 
     if (inCreated !== -1) {
       drawLayersList.created.splice(inCreated, 1);
     } else if (inEdited !== -1) {
-      drawLayersList.edited.splice(inEdited, 1)
+      drawLayersList.edited.splice(inEdited, 1);
     } else {
       drawLayersList.deleted.push(layer);
     }
@@ -187,11 +188,11 @@ export async function initDrawTools(
   map.on("pm:rotateend", ({ layer }) => {
     // Добавляем поворот полигона в список созданных или изменных в зависимости
     // от того, сами мы создали полигон или нет.
-    let inCreated = drawLayersList.created.findIndex(
-      (oldLayer) => checkLId(oldLayer, layer)
+    let inCreated = drawLayersList.created.findIndex((oldLayer) =>
+      checkLId(oldLayer, layer)
     );
-    let inEdited = drawLayersList.edited.findIndex(
-      (oldLayer) => checkLId(oldLayer, layer)
+    let inEdited = drawLayersList.edited.findIndex((oldLayer) =>
+      checkLId(oldLayer, layer)
     );
 
     if (inCreated !== -1) {
@@ -203,24 +204,23 @@ export async function initDrawTools(
     }
   });
 }
-
 
 function addLayerListeners(
-  layer: L.Layer, 
+  layer: L.Layer,
   drawLayersList: {
-    edited: L.Layer[],
-    created: L.Layer[],
-    deleted: L.Layer[]
+    edited: L.Layer[];
+    created: L.Layer[];
+    deleted: L.Layer[];
   }
 ) {
-  layer.on("pm:update", ({shape, layer}) => {
+  layer.on("pm:update", ({ shape, layer }) => {
     // Добавляем изменение полигона в список созданных или изменных в зависимости
     // от того, сами мы создали полигон или нет.
-    let inCreated = drawLayersList.created.findIndex(
-      (oldLayer) => checkLId(oldLayer, layer)
+    let inCreated = drawLayersList.created.findIndex((oldLayer) =>
+      checkLId(oldLayer, layer)
     );
-    let inEdited = drawLayersList.edited.findIndex(
-      (oldLayer) => checkLId(oldLayer, layer)
+    let inEdited = drawLayersList.edited.findIndex((oldLayer) =>
+      checkLId(oldLayer, layer)
     );
 
     if (inCreated !== -1) {
@@ -232,14 +232,14 @@ function addLayerListeners(
     }
   });
 
-  layer.on("pm:dragend", ({shape, layer}) => {
+  layer.on("pm:dragend", ({ shape, layer }) => {
     // Добавляем изменение полигона в список созданных или изменных в зависимости
     // от того, сами мы создали полигон или нет.
-    let inCreated = drawLayersList.created.findIndex(
-      (oldLayer) => checkLId(oldLayer, layer)
+    let inCreated = drawLayersList.created.findIndex((oldLayer) =>
+      checkLId(oldLayer, layer)
     );
-    let inEdited = drawLayersList.edited.findIndex(
-      (oldLayer) => checkLId(oldLayer, layer)
+    let inEdited = drawLayersList.edited.findIndex((oldLayer) =>
+      checkLId(oldLayer, layer)
     );
 
     if (inCreated !== -1) {
@@ -251,7 +251,6 @@ function addLayerListeners(
     }
   });
 }
-
 
 export function addMaps(
   map: L.Map,
@@ -271,15 +270,14 @@ export function addMaps(
   }
 }
 
-
 export function addObjects(
   map: L.Map,
   controlLayer: L.Control.Layers,
   objectsList: ObjectInfo[],
   drawLayersList: {
-    edited: L.Layer[],
-    created: L.Layer[],
-    deleted: L.Layer[]
+    edited: L.Layer[];
+    created: L.Layer[];
+    deleted: L.Layer[];
   },
   userId: string
 ) {
@@ -288,21 +286,21 @@ export function addObjects(
     // Проверяем, изменял ли уже этот слой пользователь или нет.
     // Если изменял, то добавляем измененный, если он его удалил, то не добавляем вообще.
     let inEdited = drawLayersList.edited.findIndex(
-      (edLayer: any) => edLayer.id && (edLayer.id === objectsList[i].id)
+      (edLayer: any) => edLayer.id && edLayer.id === objectsList[i].id
     );
     let inDeleted = drawLayersList.deleted.findIndex(
-      (delLayer: any) => delLayer.id && (delLayer.id === objectsList[i].id)
+      (delLayer: any) => delLayer.id && delLayer.id === objectsList[i].id
     );
     if (inDeleted === -1) {
       let objectPolygon: L.Layer = L.polygon(
         objectsList[i].coordinates as LatLngExpression[],
         { color: objectsList[i].color, fillOpacity: 0.4 }
       );
-  
+
       if (inEdited !== -1) {
         objectPolygon = drawLayersList.edited[inEdited];
       }
-  
+
       // Добавляем метаданные для перезаписи в случае изменения пользователем.
       (objectPolygon as any).id = objectsList[i].id;
       (objectPolygon as any).type = objectsList[i].type;
@@ -313,12 +311,15 @@ export function addObjects(
 
       // Добавляем слушателей на изменение полигона на него.
       addLayerListeners(objectPolygon, drawLayersList);
-  
+
       // Добавляем слой на карту.
       controlLayer.addOverlay(
         objectPolygon,
-        "<span style='color: " + objectsList[i].color + "'> " +
-        objectsList[i].name + " </span>"
+        "<span style='color: " +
+          objectsList[i].color +
+          "'> " +
+          objectsList[i].name +
+          " </span>"
       );
       map.addLayer(objectPolygon);
     }
@@ -333,7 +334,6 @@ export function addObjects(
   });
 }
 
-
 function removeObjectsMaps(
   map: L.Map,
   controlLayer: L.Control.Layers,
@@ -347,73 +347,85 @@ function removeObjectsMaps(
   });
 }
 
-
 export function prepareUpdateViewMapsAnsObjects(
   map: L.Map,
-  controlLayer: L.Control.Layers, 
+  controlLayer: L.Control.Layers,
   osmLayer: L.Layer,
   imagesList: Ref<MapInfo[]>,
   objectsList: Ref<ObjectInfo[]>,
   drawLayersList: {
-    edited: L.Layer[],
-    created: L.Layer[],
-    deleted: L.Layer[]
+    edited: L.Layer[];
+    created: L.Layer[];
+    deleted: L.Layer[];
   },
   userId: string,
-  oldPos: {center: L.LatLng, zoom: number, layersDeleted: boolean},
+  oldPos: { center: L.LatLng; zoom: number; layersDeleted: boolean },
   emit: any
 ) {
-  let updateViewMapsAnsObjects = (
-    map: L.Map,
-    controlLayer: L.Control.Layers, 
-    osmLayer: L.Layer,
-    imagesList: Ref<MapInfo[]>,
-    objectsList: Ref<ObjectInfo[]>,
-    drawLayersList: {
-      edited: L.Layer[],
-      created: L.Layer[],
-      deleted: L.Layer[]
-    },
-    userId: string,
-    oldPos: {center: L.LatLng, zoom: number, layersDeleted: boolean},
-    emit: any
-  ) => async () => {
-    let newCenterCoords = map.getBounds().getCenter();
-    let newZoom = map.getZoom();
-        
-    oldPos.center = newCenterCoords;
-    oldPos.zoom = newZoom;
-    
-    // Очищаем старые карты и объекты.
-    removeObjectsMaps(map, controlLayer, osmLayer);
-    // Запрашиваем новые объекты и карты в пределах видимости.
-    imagesList.value = await getMaps(
-      map.getBounds().getCenter()["lat"],
-      map.getBounds().getCenter()["lng"], 
-      getMapSide(map)
-    ) as MapInfo[];
-    objectsList.value = await getObjects(
-      map.getBounds().getCenter()["lat"],
-      map.getBounds().getCenter()["lng"], 
-      getMapSide(map)
-    );
-    emit("objects-updated");
-    // Добавляем объекты и карты в пределах видимости.
-    if (objectsList) {
-      addObjects(map, controlLayer, objectsList.value, drawLayersList, userId);
-    }
-    if (imagesList) {
-      addMaps(map, controlLayer, imagesList.value);
-    }
-  }
+  let updateViewMapsAnsObjects =
+    (
+      map: L.Map,
+      controlLayer: L.Control.Layers,
+      osmLayer: L.Layer,
+      imagesList: Ref<MapInfo[]>,
+      objectsList: Ref<ObjectInfo[]>,
+      drawLayersList: {
+        edited: L.Layer[];
+        created: L.Layer[];
+        deleted: L.Layer[];
+      },
+      userId: string,
+      oldPos: { center: L.LatLng; zoom: number; layersDeleted: boolean },
+      emit: any
+    ) =>
+    async () => {
+      let newCenterCoords = map.getBounds().getCenter();
+      let newZoom = map.getZoom();
+
+      oldPos.center = newCenterCoords;
+      oldPos.zoom = newZoom;
+
+      // Очищаем старые карты и объекты.
+      removeObjectsMaps(map, controlLayer, osmLayer);
+      // Запрашиваем новые объекты и карты в пределах видимости.
+      imagesList.value = (await getMaps(
+        map.getBounds().getCenter()["lat"],
+        map.getBounds().getCenter()["lng"],
+        getMapSide(map)
+      )) as MapInfo[];
+      objectsList.value = await getObjects(
+        map.getBounds().getCenter()["lat"],
+        map.getBounds().getCenter()["lng"],
+        getMapSide(map)
+      );
+      emit("objects-updated");
+      // Добавляем объекты и карты в пределах видимости.
+      if (objectsList) {
+        addObjects(
+          map,
+          controlLayer,
+          objectsList.value,
+          drawLayersList,
+          userId
+        );
+      }
+      if (imagesList) {
+        addMaps(map, controlLayer, imagesList.value);
+      }
+    };
 
   return updateViewMapsAnsObjects(
-    map, controlLayer, osmLayer,
-    imagesList, objectsList, drawLayersList,
-    userId, oldPos, emit
-  )
+    map,
+    controlLayer,
+    osmLayer,
+    imagesList,
+    objectsList,
+    drawLayersList,
+    userId,
+    oldPos,
+    emit
+  );
 }
-
 
 export function getMapSide(map: L.Map) {
   let center = map.getBounds().getCenter();
@@ -423,25 +435,30 @@ export function getMapSide(map: L.Map) {
 }
 
 function checkLId(oneLayer: L.Layer, secondLayer: L.Layer) {
-  return (oneLayer as any)._leaflet_id === (secondLayer as any)._leaflet_id
+  return (oneLayer as any)._leaflet_id === (secondLayer as any)._leaflet_id;
 }
 
 function sendObjects(
   drawLayersList: {
-    edited: L.Layer[],
-    created: L.Layer[],
-    deleted: L.Layer[]
+    edited: L.Layer[];
+    created: L.Layer[];
+    deleted: L.Layer[];
   },
   toaster: any,
   updateViewMapsAnsObjects: () => Promise<void>
 ) {
   // Сформируем списки ObjectInfo для отправки.
-  let edited: ObjectInfo[] = []; 
-  let created: ObjectInfo[] = []; 
-  let deleted: ObjectInfo[] = []; 
-
+  let edited: ObjectInfo[] = [];
+  let created: ObjectInfo[] = [];
+  let deleted: ObjectInfo[] = [];
 
   let listFormation = (objList: ObjectInfo[]) => (layer: any) => {
+    let coordinates = [];
+
+    for (let i = 0; i < layer._latlngs[0]; i++) {
+      coordinates.push([layer._latlngs[0][i].lat, layer._latlngs[0][i].lng]);
+    }
+
     objList.push({
       id: layer.id,
       type: layer.type,
@@ -449,8 +466,11 @@ function sendObjects(
       color: layer.color,
       updateUserId: layer.updateUserId,
       updateDatetime: layer.updateDatetime,
-      center: [layer.getBounds().getCenter()["lng"], layer.getBounds().getCenter()["lat"]],
-      coordinates: layer._latlngs[0]
+      center: [
+        layer.getBounds().getCenter()["lng"],
+        layer.getBounds().getCenter()["lat"],
+      ],
+      coordinates: coordinates,
     });
   };
 
@@ -459,22 +479,25 @@ function sendObjects(
   drawLayersList.deleted.forEach(listFormation(deleted));
 
   // Отправляем на сервер.
-  api.post("/objects/update", {
-    edited: edited,
-    created: created,
-    deleted: deleted
-  }).then(() => {
-    toaster.addToast({
-      title: "Информация",
-      body: "Изменения сохранены успешно",
-      type: ToastTypes.success,
+  api
+    .post("/objects/update", {
+      edited: edited,
+      created: created,
+      deleted: deleted,
+    })
+    .then(() => {
+      toaster.addToast({
+        title: "Информация",
+        body: "Изменения сохранены успешно",
+        type: ToastTypes.success,
+      });
+      updateViewMapsAnsObjects();
+    })
+    .catch(() => {
+      toaster.addToast({
+        title: "Информация",
+        body: "Не удалось сохранить изменения",
+        type: ToastTypes.danger,
+      });
     });
-    updateViewMapsAnsObjects();
-  }).catch(() => {
-    toaster.addToast({
-      title: "Информация",
-      body: "Не удалось сохранить изменения",
-      type: ToastTypes.danger,
-    });
-  });
 }
