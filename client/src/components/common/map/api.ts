@@ -455,7 +455,7 @@ function sendObjects(
   let listFormation = (objList: ObjectInfo[]) => (layer: any) => {
     let coordinates = [];
 
-    for (let i = 0; i < layer._latlngs[0]; i++) {
+    for (let i = 0; i < layer._latlngs[0].length; i++) {
       coordinates.push([layer._latlngs[0][i].lat, layer._latlngs[0][i].lng]);
     }
 
