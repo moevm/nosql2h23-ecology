@@ -101,8 +101,6 @@ class ImagesForTable(Resource):
 
 @api.route('/user/<string:id>')
 class UserResource(Resource):
-    @login_required
-    @role_require('admin')
     def get(self, id):
         return parse_json(get_user_by_id(id))
 
