@@ -7,21 +7,130 @@ on:
 
 jobs:
   check_tag_08_docker_compose:
-    name: "Проверка наличия тега 0.8 и работоспособности docker-compose"
+    name: "Проверка наличия тега 0.8 и работоспособности docker compose"
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         name: Check out current commit
         with:
           fetch-depth: 0
+
+      - name: There are at least one Dockerfile
+        run: |
+          if ! find ./ | grep -q 'Dockerfile$'
+          then
+            echo "::error:: Не найдены файлы с названием Dockerfile." 
+            exit 1
+          fi
+
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          recursive: true
+          failure-threshold: error
+          override-error: DL3006, DL3000, DL3007, DL3008, DL3009, DL3013, DL3016, DL3018, DL3020, DL3028, DL3037, DL3047, DL4001, DL4003, DL4004
+          
+      - name: Check docker-compose.yml
+        run: |
+          set -e
+                    
+          dc_file=${1:-"./docker-compose.yml"}
+
+          if [[ ! -f "${dc_file}" ]]; 
+          then
+              echo "::error:: Ошибка - нет файла docker-compose.yml"
+              exit 1
+          fi
+          
+          services_count=`yq '.services | length' ${dc_file}`
+          if [[ "${services_count}" -lt "2" ]];
+          then
+            echo "::error:: Ошибка - слишком мало сервисов в конфигурации. У вас должно быть минимум два сервиса - приложение и СУБД."
+            exit 1
+          fi
+          
+          if [[ "`yq '.services.db.ports' ${dc_file}`" != "null"  ]]; 
+          then
+            echo "::error:: Ошибка - в сервисе db открыты сетевые порты через ports. Для работы приложения они не нужны, если вам требуется доступ для СУБД в отладочных целях, то можно или поднять веб-интерфейс (и ему открыть порты), или получать доступ по внутренней сети докера. "
+            exit 1
+          fi
+          
+          if [[ "`yq '.services.db.volumes' ${dc_file}`" == "null"  ]];
+          then
+            echo "::error:: Ошибка - в сервисе db не организованы volumes. По заданию они требуются для того, чтобы сохранять данные БД между запусками вашей конфигурации"
+            exit 1
+          fi
+
+          if yq '.services.db.volumes' ${dc_file} | grep -q '^[^/a-zA-Z]*/'
+          then
+            echo "::error:: Ошибка - в сервисе db  volumes использует монтирование каталогов. Используйте вместо этого именно volumes ( https://docs.docker.com/storage/volumes/#use-a-volume-with-docker-compose) - это гораздо удобнее и позволяет управлять таким хранилищем через докер."
+            exit 1
+          fi
+          
+          if yq '.network' ${dc_file} | grep -q 'host' ; 
+          then
+            echo "::error:: Ошибка - сеть типа host. Пожалуйста, не используйте данный тип сети: он максимально небезопасен (так как неглядя мапит все порты вашей конфигурации на адаптер хоста) и неудобен. Укажите вместо этого конкретные маппинги портов в соответствующих директивах ports"
+            exit 1
+          fi
+
+          # Проверка volumes
+          echo "::info:: Ниже будут все volumes всех сервисов"
+          yq '.services.*.volumes' ${dc_file}
+          if yq '.services.*.volumes' ${dc_file} | grep -v ':ro$' | grep -q '^[^/a-zA-Z]*/'
+          then
+            echo "::error:: Ошибка - у вас есть смонтированные в volumes файлы и/или каталоги без метки ro (read-only, https://docs.docker.com/compose/compose-file/05-services/#short-syntax-5). Монтируемый каталог или файл нужно или копировать на этапе сборки контейнера (если там данные, которые не предполагают изменение), или ставить опцию :ro ."
+            exit 1
+          fi
+          
+          
+          # Проверка всех сервисов на общие ошибки
+          for i in $(seq 0 $(( services_count - 1 )) );
+          do
+            service=`yq '.services | keys ['$i']' ${dc_file}`
+            echo "::info:: Проверка сервиса: ${service}"
+            yq '.services.'$service ${dc_file}
+          
+            image=`yq '.services.'$service'.image' ${dc_file}`
+            if [[ "${image}" != "null" ]];
+            then
+              if echo ${image} | grep -qE ':latest|^[^:]*$';
+              then
+                echo "::error:: Ошибка - отсутствие тега или использование тега latest. Обе эти ситуации означают, что вы не привязаны к опредлеленной версии образа и в случае его обновления работа приложения может нарушится (а вы об этом узнаете только постфактум). Укажите явно тег."
+                exit 1
+              fi
+            fi
+          
+            ports=`yq '.services.'$service'.ports' ${dc_file}`
+            if [[ "${ports}" != "null" ]];
+            then
+              if echo ${ports} | grep -qv '^[^0-9]*127.0.0.1:';
+              then
+                echo "::error:: Ошибка - явно не указан интерфейс при маппинге портов. По умолчанию (если не указывать вот так 127.0.0.1:3000:80), докер мапит на все доступные интерфейсы и это нарушает безопасность. Добавьте 127.0.0.1: к содержимому директивы ports "
+                exit 1
+              fi
+            fi
+          
+            external_ports=`echo $ports | grep -o ':[0-9]\+:' | tr -d ':'`
+            for ext_port in $external_ports;
+            do 
+              if [[ "$ext_port" -lt 1025 ]];
+              then
+                echo "::error:: Ошибка - использование внешних портов хоста <=1024. Данные порты зарезервированы под системные нужды, лучше использовать порты с номерами выше 8000 (чтобы не было коллизий). "
+                exit 1
+              fi
+            done
+          
+          done
+
     
       - name: Build docker-compose
         run: |
-          docker-compose build --no-cache
+          docker compose build --no-cache
 
       - name: Run docker-compose
         run: |
-          docker-compose up -d
+          docker compose up -d
           sleep 30
 
       - name: Check containers are alive

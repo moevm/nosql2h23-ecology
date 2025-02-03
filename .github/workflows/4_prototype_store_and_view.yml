@@ -10,11 +10,38 @@ jobs:
     name: "Проверка наличия тега 0.5"
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         name: Check out current commit
         with:
           fetch-depth: 0
-    
+       
+      - name: Check docker-compose.yml
+        run: |
+          set -e
+                    
+          dc_file=${1:-"./docker-compose.yml"}
+
+          if [[ ! -f "${dc_file}" ]]; 
+          then
+              echo "::error:: Ошибка - нет файла docker-compose.yml"
+              exit 1
+          fi
+
+          db_service=`yq '.services.db' ${dc_file}`
+          if [[ "${db_service}" == "null" ]];
+          then
+            echo "::error:: Ошибка - нет явно заданного сервиса для СУБД (с названием db)"
+            exit 1
+          fi
+
+      - name: Build docker-compose
+        run: |
+          docker compose build --no-cache
+
+      - name: Run docker-compose
+        run: |
+          docker compose up -d
+      
       - name: check
         run: |
           TAG="0.5"

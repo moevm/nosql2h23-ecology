@@ -11,7 +11,7 @@ jobs:
     name: "Проверка наличия вики-страницы \"Модель данных\" и разделов \"Нереляционная модель\",  \"Реляционная модель\", \"Сравнение моделей\", \"Вывод\" в ней"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         name: Check wiki
         with:
           repository: ${{github.repository}}.wiki
@@ -22,7 +22,10 @@ jobs:
           sql_model="Реляционная модель"
           comparison="Сравнение моделей"
           conclusion="Вывод"
-
+          query_examples="Примеры запросов"
+          data_examples="Примеры данных"
+          redundancy="Избыточность данных"
+           
           if ! [[ -f "${page}" ]]; then 
             echo "::error::Предварительная проверка не пройдена - не найдена вики-страница \"Модель данных\""
             exit 1
@@ -36,6 +39,30 @@ jobs:
 
           if ! cat "${page}" | grep -q "${sql_model}"; then 
             echo "::error::Предварительная проверка не пройдена - не найден заголовок ${sql_model}"
+            exit 1
+          fi
+
+          image_count=`cat "${page}" | grep '!\[[^]]*\](http[^)]*)' | wc -l`
+          if [[ ${image_count} -lt 2  ]]; then
+            echo "::error::Предварительная проверка не пройдена - не найдены изображения для схем моделей данных. Для реляционной и нереляционной модели необходимо разместить изображения схем моделей данных.  Вставьте их через ![название_картинки](полная_ссылка)."
+            exit 1
+          fi
+
+          query_examples_count=`cat "${page}" | grep  "${query_examples}" | wc -l`
+          if [[  "${query_examples_count}" != "2" ]]; then 
+            echo "::error::Предварительная проверка не пройдена - не найдены заголовоки ${query_examples} (соответствующие подразделы должны быть в разделах с нереляционной и реляционной моделями)."
+            exit 1
+          fi
+
+          data_examples_count=`cat "${page}" | grep  "${data_examples}" | wc -l`
+          if [[  "${data_examples_count}" != "2" ]]; then 
+            echo "::error::Предварительная проверка не пройдена - не найдены заголовоки ${data_examples} (соответствующие подразделы должны быть в разделах с нереляционной и реляционной моделями)."
+            exit 1
+          fi
+
+          redundancy_count=`cat "${page}" | grep  "${redundancy}" | wc -l`
+          if [[  "${redundancy_count}" != "2" ]]; then 
+            echo "::error::Предварительная проверка не пройдена - не найдены заголовоки ${redundancy} (соответствующие подразделы должны быть в разделах с нереляционной и реляционной моделями)."
             exit 1
           fi
 

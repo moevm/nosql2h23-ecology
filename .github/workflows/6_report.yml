@@ -10,7 +10,7 @@ jobs:
     name: "Проверка наличия пояснительной записки (report.doc / report.docx / report.odt + report.pdf в корне репо)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         name: Check out current commit
     
       - name: check

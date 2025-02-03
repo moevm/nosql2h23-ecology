@@ -10,10 +10,54 @@ jobs:
     name: "Проверка наличия тега 1.0"
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         name: Check out current commit
         with:
           fetch-depth: 0
+
+      - name: Build docker-compose
+        run: |
+          docker compose build --no-cache
+  
+      - name: Run docker-compose
+        run: |
+          docker compose up -d
+          sleep 30
+
+      - name: Check web client root page
+        run: |
+          set -e
+                    
+          dc_file=${1:-"./docker-compose.yml"}
+          success_codes=0
+
+          if [[ ! -f "${dc_file}" ]]; 
+          then
+              echo "::error:: Ошибка - нет файла docker-compose.yml"
+              exit 1
+          fi
+      
+          # Проход по всем сервисам.
+          services_count=`yq '.services | length' ${dc_file}`
+          for i in $(seq 0 $(( services_count - 1 )) );
+          do
+            service=`yq '.services | keys ['$i']' ${dc_file}`
+          
+            ports=`yq '.services.'$service'.ports' ${dc_file}`
+            external_ports=`echo $ports | grep -o ':[0-9]\+:' | tr -d ':'`
+            for ext_port in $external_ports;
+            do 
+              if [[ `curl -s -o /dev/null -w "%{http_code}" "127.0.0.1:${ext_port}"` -eq  200 ]];
+              then
+                success_codes=$((success_codes+1))
+              fi
+            done
+          done
+          if [[ ${success_codes} -eq 0 ]];
+          then
+            echo "::error:: Ошибка - обращение к корню (\) запущенного web-клиента вернуло ошибку."
+            exit 1
+          fi
     
       - name: check
         run: |

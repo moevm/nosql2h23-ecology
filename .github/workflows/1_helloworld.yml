@@ -1,4 +1,4 @@
-name: "1. Установка и настройка выбранной БД + ЯП"
+name: "1. Согласована и сформулирована тема курсовой"
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
     name: "Проверка наличия каталога ./hello_world/"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         name: Check out current commit
     
       - name: check
